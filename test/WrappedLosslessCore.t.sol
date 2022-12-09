@@ -2,33 +2,120 @@
 pragma solidity ^0.8.13;
 
 import "forge-std/Test.sol";
-import "../src/WrappedLosslessFactory.sol";
-import "../src/LosslessWrappedERC20.sol";
 
-contract WrappedLosslessFactoryTests is Test {
-    WrappedLosslessFactory public wrappedCore;
-    IERC20 public randomERC20;
-    address public lssAdmin = address(1);
+import "../src/LosslessWrappedERC20.sol";
+import "../src/LosslessWrappingFactory.sol";
+import "../src/Extensions/LosslessERC20ApproveExtension.sol";
+import "../src/Mocks/ERC20Mock.sol";
+import "forge-std/console.sol";
+
+contract WrappedERC20Test is Test {
+    LosslessWrappedERC20 public wrappedCore;
+    WrappedLosslessFactory public losslessFactory;
+    LosslessApproveTransferExtension public approveExtension;
+    TestToken public testERC20;
+    address tokenOwner = address(1);
 
     function setUp() public {
-        vm.prank(lssAdmin);
-        wrappedCore = new WrappedLosslessFactory();
-        randomERC20 = new ERC20("Some Token", "SOTO");
-    }
-
-    function testSetNumber() public {
-        address owner = wrappedCore.owner();
-        assertTrue(owner != address(0));
+        losslessFactory = new WrappedLosslessFactory();
+        approveExtension = new LosslessApproveTransferExtension();
+        vm.prank(tokenOwner);
+        testERC20 = new TestToken("Testing Token", "TEST", 100000000);
     }
 
     function testRegisterToken() public {
-        vm.prank(lssAdmin);
-        LosslessWrappedERC20 newWrappedToken = wrappedCore.registerToken(
-            randomERC20,
-            true
+        LosslessWrappedERC20 newWrappedToken = losslessFactory.registerToken(
+            testERC20
         );
 
-        assertEq(newWrappedToken.name(), "Lossless Wrapped Some Token");
-        assertEq(newWrappedToken.symbol(), "wLssSOTO");
+        assertEq(newWrappedToken.name(), "Lossless Wrapped Testing Token");
+        assertEq(newWrappedToken.symbol(), "wLssTEST");
+    }
+
+    function tesRegularTransfer() public {
+        vm.prank(tokenOwner);
+        LosslessWrappedERC20 newWrappedToken = losslessFactory.registerToken(
+            testERC20
+        );
+
+        assertEq(newWrappedToken.name(), "Lossless Wrapped Testing Token");
+        assertEq(newWrappedToken.symbol(), "wLssTEST");
+
+        vm.prank(tokenOwner);
+        testERC20.approve(address(newWrappedToken), 10);
+
+        vm.prank(tokenOwner);
+        newWrappedToken.depositFor(tokenOwner, 10);
+
+        assertEq(newWrappedToken.balanceOf(tokenOwner), 10);
+    }
+
+    function testRegisterApproveExtension() public {
+        vm.prank(tokenOwner);
+        LosslessWrappedERC20 newWrappedToken = losslessFactory.registerToken(
+            testERC20
+        );
+
+        assertEq(newWrappedToken.name(), "Lossless Wrapped Testing Token");
+        assertEq(newWrappedToken.symbol(), "wLssTEST");
+
+        newWrappedToken.registerExtension(address(approveExtension));
+
+        address[] memory extensions = newWrappedToken.getExtensions();
+
+        assertEq(extensions[0], address(approveExtension));
+
+        approveExtension.setApproveTransfer(address(newWrappedToken));
+
+        vm.prank(tokenOwner);
+        testERC20.approve(address(newWrappedToken), 10);
+
+        vm.prank(tokenOwner);
+        newWrappedToken.depositFor(tokenOwner, 10);
+
+        assertEq(newWrappedToken.balanceOf(tokenOwner), 10);
+    }
+
+    function testUnregisterApproveExtension() public {
+        vm.prank(tokenOwner);
+        LosslessWrappedERC20 newWrappedToken = losslessFactory.registerToken(
+            testERC20
+        );
+
+        assertEq(newWrappedToken.name(), "Lossless Wrapped Testing Token");
+        assertEq(newWrappedToken.symbol(), "wLssTEST");
+
+        newWrappedToken.registerExtension(address(approveExtension));
+
+        address[] memory extensions = newWrappedToken.getExtensions();
+
+        assertEq(extensions[0], address(approveExtension));
+
+        approveExtension.setApproveTransfer(address(newWrappedToken));
+
+        newWrappedToken.unregisterExtension(address(approveExtension));
+
+        extensions = newWrappedToken.getExtensions();
+
+        assertEq(extensions.length, 0);
+    }
+
+    function testBlacklistApproveExtension() public {
+        vm.prank(tokenOwner);
+        LosslessWrappedERC20 newWrappedToken = losslessFactory.registerToken(
+            testERC20
+        );
+
+        assertEq(newWrappedToken.name(), "Lossless Wrapped Testing Token");
+        assertEq(newWrappedToken.symbol(), "wLssTEST");
+
+        newWrappedToken.blacklistExtension(address(approveExtension));
+
+        vm.expectRevert(bytes("LSS: Extension blacklisted"));
+        newWrappedToken.registerExtension(address(approveExtension));
+
+        address[] memory extensions = newWrappedToken.getExtensions();
+
+        assertEq(extensions.length, 0);
     }
 }
