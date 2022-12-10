@@ -2,8 +2,6 @@
 
 pragma solidity ^0.8.0;
 
-/// @author: manifold.xyz
-
 import "openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "openzeppelin/contracts/utils/Strings.sol";
 import "openzeppelin/contracts/utils/introspection/ERC165.sol";
