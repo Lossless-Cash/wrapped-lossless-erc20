@@ -3,15 +3,34 @@ pragma solidity ^0.8.13;
 
 import "openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "openzeppelin/contracts/token/ERC20/extensions/ERC20Wrapper.sol";
-import "./Interfaces/IWrappedERC20Core.sol";
-import "./WrappedERC20Core.sol";
+import "./Interfaces/ILosslessWrappedERC20.sol";
+import "./Interfaces/ILosslessERC20ApproveExtension.sol";
+import "./LosslessExtensionCore.sol";
 
-contract LosslessWrappedERC20 is ERC20Wrapper, WrappedERC20Core {
+contract LosslessWrappedERC20 is
+    ERC20Wrapper,
+    ILosslessWrappedERC20,
+    LosslessExtensionCore
+{
+    uint256 public constant VERSION = 1;
+
     constructor(
         IERC20 _underlyingToken,
         string memory _name,
         string memory _symbol
     ) ERC20(_name, _symbol) ERC20Wrapper(_underlyingToken) {}
+
+    function supportsInterface(bytes4 interfaceId)
+        public
+        view
+        virtual
+        override(ILosslessWrappedERC20, LosslessExtensionCore)
+        returns (bool)
+    {
+        return
+            interfaceId == type(ILosslessWrappedERC20).interfaceId ||
+            super.supportsInterface(interfaceId);
+    }
 
     function _afterTokenTransfer(
         address from,
@@ -37,16 +56,38 @@ contract LosslessWrappedERC20 is ERC20Wrapper, WrappedERC20Core {
         super._burn(account, amount);
     }
 
-    function registerExtension(address extension) external override {
+    function registerExtension(address extension)
+        external
+        override(ICoreExtension, ILosslessWrappedERC20)
+    {
         requireNonBlacklist(extension);
         _registerExtension(extension);
     }
 
-    function unregisterExtension(address extension) external override {
+    function unregisterExtension(address extension)
+        external
+        override(ICoreExtension, ILosslessWrappedERC20)
+    {
         _unregisterExtension(extension);
     }
 
-    function blacklistExtension(address extension) external override {
+    function blacklistExtension(address extension)
+        external
+        override(ICoreExtension, ILosslessWrappedERC20)
+    {
         _blacklistExtension(extension);
+    }
+
+    function _approveTransfer(address from, address to) internal {
+        if (_approveTransferBase != address(0)) {
+            require(
+                IERC20ApproveExtension(_approveTransferBase).approveTransfer(
+                    msg.sender,
+                    from,
+                    to
+                ),
+                "LSS: Extension approval failure"
+            );
+        }
     }
 }

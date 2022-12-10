@@ -1,9 +1,11 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.13;
 
-import "../Interfaces/ILosslessExtensionCore.sol";
+//import "../Interfaces/ILosslessExtensionCore.sol";
 
-interface IERC20ApproveExtension is ICoreExtension {
+interface IERC20ApproveExtension {
+    function supportsInterface(bytes4 interfaceId) external view returns (bool);
+
     function setApproveTransfer(address creator) external;
 
     function approveTransfer(

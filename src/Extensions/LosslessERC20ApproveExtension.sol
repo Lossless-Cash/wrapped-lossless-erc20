@@ -5,13 +5,17 @@ pragma solidity ^0.8.0;
 import "openzeppelin/contracts/utils/introspection/IERC165.sol";
 import "openzeppelin/contracts/utils/introspection/ERC165Checker.sol";
 import "../Interfaces/ILosslessERC20ApproveExtension.sol";
-import "../LosslessExtensionCore.sol";
-import "../Interfaces/IWrappedERC20Core.sol";
+import "../Interfaces/ILosslessWrappedERC20.sol";
 
 contract LosslessApproveTransferExtension is IERC20ApproveExtension {
-    address[] registeredExtensions;
+    //address[] registeredExtensions;
 
-    function supportsInterface(bytes4 interfaceId) public view returns (bool) {
+    function supportsInterface(bytes4 interfaceId)
+        public
+        view
+        override
+        returns (bool)
+    {
         return interfaceId == type(IERC20ApproveExtension).interfaceId;
     }
 
@@ -19,11 +23,11 @@ contract LosslessApproveTransferExtension is IERC20ApproveExtension {
         require(
             ERC165Checker.supportsInterface(
                 creator,
-                type(IERC20WrappedCore).interfaceId
+                type(ILosslessWrappedERC20).interfaceId
             ),
             "LSS: Creator must implement IERC20WrappedCore"
         );
-        IERC20WrappedCore(creator).setApproveTransferExtension();
+        ILosslessWrappedERC20(creator).setApproveTransferExtension();
     }
 
     function approveTransfer(
@@ -33,7 +37,7 @@ contract LosslessApproveTransferExtension is IERC20ApproveExtension {
     ) external override returns (bool) {
         return true;
     }
-
+    /* 
     function blacklistExtension(address extension) external override {
         emit ExtensionBlacklisted(extension, msg.sender);
     }
@@ -53,7 +57,7 @@ contract LosslessApproveTransferExtension is IERC20ApproveExtension {
         require(
             ERC165Checker.supportsInterface(
                 msg.sender,
-                type(IERC20WrappedCore).interfaceId
+                type(ILosslessWrappedERC20).interfaceId
             ),
             "LSS: Creator must implement IERC20WrappedCore"
         );
@@ -63,5 +67,5 @@ contract LosslessApproveTransferExtension is IERC20ApproveExtension {
 
     function unregisterExtension(address extension) external {
         emit ExtensionUnregistered(extension, msg.sender);
-    }
+    } */
 }
