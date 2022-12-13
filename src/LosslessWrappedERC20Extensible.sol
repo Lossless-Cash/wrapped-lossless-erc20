@@ -3,13 +3,13 @@ pragma solidity ^0.8.13;
 
 import "openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "openzeppelin/contracts/token/ERC20/extensions/ERC20Wrapper.sol";
-import "./Interfaces/ILosslessWrappedERC20.sol";
+import "./Interfaces/ILosslessExtensibleWrappedERC20.sol";
 import "./Interfaces/ILosslessERC20ApproveExtension.sol";
 import "./LosslessExtensionCore.sol";
 
-contract LosslessWrappedERC20 is
+contract LosslessWrappedERC20Extensible is
     ERC20Wrapper,
-    ILosslessWrappedERC20,
+    ILosslessExtensibleWrappedERC20,
     LosslessExtensionCore
 {
     uint256 public constant VERSION = 1;
@@ -24,11 +24,11 @@ contract LosslessWrappedERC20 is
         public
         view
         virtual
-        override(ILosslessWrappedERC20, LosslessExtensionCore)
+        override(ILosslessExtensibleWrappedERC20, LosslessExtensionCore)
         returns (bool)
     {
         return
-            interfaceId == type(ILosslessWrappedERC20).interfaceId ||
+            interfaceId == type(ILosslessExtensibleWrappedERC20).interfaceId ||
             super.supportsInterface(interfaceId);
     }
 
@@ -58,7 +58,7 @@ contract LosslessWrappedERC20 is
 
     function registerExtension(address extension)
         external
-        override(ICoreExtension, ILosslessWrappedERC20)
+        override(ICoreExtension, ILosslessExtensibleWrappedERC20)
     {
         requireNonBlacklist(extension);
         _registerExtension(extension);
@@ -66,14 +66,14 @@ contract LosslessWrappedERC20 is
 
     function unregisterExtension(address extension)
         external
-        override(ICoreExtension, ILosslessWrappedERC20)
+        override(ICoreExtension, ILosslessExtensibleWrappedERC20)
     {
         _unregisterExtension(extension);
     }
 
     function blacklistExtension(address extension)
         external
-        override(ICoreExtension, ILosslessWrappedERC20)
+        override(ICoreExtension, ILosslessExtensibleWrappedERC20)
     {
         _blacklistExtension(extension);
     }

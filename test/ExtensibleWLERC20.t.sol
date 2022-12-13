@@ -3,14 +3,14 @@ pragma solidity ^0.8.13;
 
 import "forge-std/Test.sol";
 
-import "../src/LosslessWrappedERC20.sol";
+import "../src/LosslessWrappedERC20Extensible.sol";
 import "../src/LosslessWrappingFactory.sol";
 import "../src/Extensions/LosslessERC20ApproveExtension.sol";
 import "../src/Mocks/ERC20Mock.sol";
 import "forge-std/console.sol";
 
 contract WrappedERC20Test is Test {
-    LosslessWrappedERC20 public wrappedCore;
+    LosslessWrappedERC20Extensible public wrappedCore;
     WrappedLosslessFactory public losslessFactory;
     LosslessApproveTransferExtension public approveExtension;
     TestToken public testERC20;
@@ -24,9 +24,8 @@ contract WrappedERC20Test is Test {
     }
 
     function testRegisterToken() public {
-        LosslessWrappedERC20 newWrappedToken = losslessFactory.registerToken(
-            testERC20
-        );
+        LosslessWrappedERC20Extensible newWrappedToken = losslessFactory
+            .registerToken(testERC20);
 
         assertEq(newWrappedToken.name(), "Lossless Wrapped Testing Token");
         assertEq(newWrappedToken.symbol(), "wLssTEST");
@@ -34,9 +33,8 @@ contract WrappedERC20Test is Test {
 
     function tesRegularTransfer() public {
         vm.prank(tokenOwner);
-        LosslessWrappedERC20 newWrappedToken = losslessFactory.registerToken(
-            testERC20
-        );
+        LosslessWrappedERC20Extensible newWrappedToken = losslessFactory
+            .registerToken(testERC20);
 
         assertEq(newWrappedToken.name(), "Lossless Wrapped Testing Token");
         assertEq(newWrappedToken.symbol(), "wLssTEST");
@@ -52,9 +50,8 @@ contract WrappedERC20Test is Test {
 
     function testRegisterApproveExtension() public {
         vm.prank(tokenOwner);
-        LosslessWrappedERC20 newWrappedToken = losslessFactory.registerToken(
-            testERC20
-        );
+        LosslessWrappedERC20Extensible newWrappedToken = losslessFactory
+            .registerToken(testERC20);
 
         assertEq(newWrappedToken.name(), "Lossless Wrapped Testing Token");
         assertEq(newWrappedToken.symbol(), "wLssTEST");
@@ -78,9 +75,8 @@ contract WrappedERC20Test is Test {
 
     function testUnregisterApproveExtension() public {
         vm.prank(tokenOwner);
-        LosslessWrappedERC20 newWrappedToken = losslessFactory.registerToken(
-            testERC20
-        );
+        LosslessWrappedERC20Extensible newWrappedToken = losslessFactory
+            .registerToken(testERC20);
 
         assertEq(newWrappedToken.name(), "Lossless Wrapped Testing Token");
         assertEq(newWrappedToken.symbol(), "wLssTEST");
@@ -102,9 +98,8 @@ contract WrappedERC20Test is Test {
 
     function testBlacklistApproveExtension() public {
         vm.prank(tokenOwner);
-        LosslessWrappedERC20 newWrappedToken = losslessFactory.registerToken(
-            testERC20
-        );
+        LosslessWrappedERC20Extensible newWrappedToken = losslessFactory
+            .registerToken(testERC20);
 
         assertEq(newWrappedToken.name(), "Lossless Wrapped Testing Token");
         assertEq(newWrappedToken.symbol(), "wLssTEST");

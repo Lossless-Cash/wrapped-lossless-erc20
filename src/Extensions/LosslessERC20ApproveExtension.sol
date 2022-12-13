@@ -5,7 +5,7 @@ pragma solidity ^0.8.0;
 import "openzeppelin/contracts/utils/introspection/IERC165.sol";
 import "openzeppelin/contracts/utils/introspection/ERC165Checker.sol";
 import "../Interfaces/ILosslessERC20ApproveExtension.sol";
-import "../Interfaces/ILosslessWrappedERC20.sol";
+import "../Interfaces/ILosslessExtensibleWrappedERC20.sol";
 
 contract LosslessApproveTransferExtension is IERC20ApproveExtension {
     //address[] registeredExtensions;
@@ -23,11 +23,11 @@ contract LosslessApproveTransferExtension is IERC20ApproveExtension {
         require(
             ERC165Checker.supportsInterface(
                 creator,
-                type(ILosslessWrappedERC20).interfaceId
+                type(ILosslessExtensibleWrappedERC20).interfaceId
             ),
             "LSS: Creator must implement IERC20WrappedCore"
         );
-        ILosslessWrappedERC20(creator).setApproveTransferExtension();
+        ILosslessExtensibleWrappedERC20(creator).setApproveTransferExtension();
     }
 
     function approveTransfer(
@@ -57,7 +57,7 @@ contract LosslessApproveTransferExtension is IERC20ApproveExtension {
         require(
             ERC165Checker.supportsInterface(
                 msg.sender,
-                type(ILosslessWrappedERC20).interfaceId
+                type(ILosslessExtensibleWrappedERC20).interfaceId
             ),
             "LSS: Creator must implement IERC20WrappedCore"
         );
