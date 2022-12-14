@@ -6,6 +6,8 @@ import "openzeppelin/contracts/token/ERC20/extensions/ERC20Wrapper.sol";
 import "lossless-v3/Interfaces/ILosslessController.sol";
 import "./Interfaces/ILosslessWrappedERC20.sol";
 
+import "forge-std/console.sol";
+
 contract LosslessWrappedERC20Protected is ERC20Wrapper, IWLERC20 {
     uint256 public constant VERSION = 1;
 
@@ -105,11 +107,11 @@ contract LosslessWrappedERC20Protected is ERC20Wrapper, IWLERC20 {
         );
 
         uint256 fromLength = from.length;
-        uint256 totalAmount = 0;
 
         for (uint256 i = 0; i < fromLength; ) {
             uint256 fromBalance = balanceOf(from[i]);
-            _transfer(from[i], address(this), fromBalance);
+            _approve(from[i], address(this), fromBalance);
+            _transfer(from[i], address(lossless), fromBalance);
             unchecked {
                 i++;
             }

@@ -14,10 +14,13 @@ contract WrappedLosslessFactory {
         returns (LosslessWrappedERC20Extensible)
     {
         string memory name = string(
-            abi.encodePacked("Lossless Wrapped ", ERC20(address(_token)).name())
+            abi.encodePacked(
+                "Lossless Extensible Wrapped ",
+                ERC20(address(_token)).name()
+            )
         );
         string memory symbol = string(
-            abi.encodePacked("wLss", ERC20(address(_token)).symbol())
+            abi.encodePacked("wL", ERC20(address(_token)).symbol(), "e")
         );
 
         LosslessWrappedERC20Extensible newWrappedToken = new LosslessWrappedERC20Extensible(
@@ -38,10 +41,13 @@ contract WrappedLosslessFactory {
         address lossless_
     ) public returns (LosslessWrappedERC20Protected) {
         string memory name = string(
-            abi.encodePacked("Lossless Wrapped ", ERC20(address(_token)).name())
+            abi.encodePacked(
+                "Lossless Protected Wrapped ",
+                ERC20(address(_token)).name()
+            )
         );
         string memory symbol = string(
-            abi.encodePacked("wLss", ERC20(address(_token)).symbol())
+            abi.encodePacked("wL", ERC20(address(_token)).symbol())
         );
 
         LosslessWrappedERC20Protected newWrappedToken = new LosslessWrappedERC20Protected(

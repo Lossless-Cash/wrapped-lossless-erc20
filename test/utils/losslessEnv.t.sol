@@ -13,6 +13,7 @@ import "lossless-v3/LosslessStaking.sol";
 
 import "wLERC20/Mocks/ERC20Mock.sol";
 import "wLERC20/LosslessWrappedERC20Extensible.sol";
+import "wLERC20/LosslessWrappedERC20Protected.sol";
 import "wLERC20/LosslessWrappingFactory.sol";
 import "wLERC20/Extensions/LosslessERC20ApproveExtension.sol";
 
@@ -40,7 +41,8 @@ contract LosslessTestEnvironment is Test {
     LERC20 public lssToken;
     TestToken public testERC20;
 
-    LosslessWrappedERC20Extensible public wLERC20;
+    LosslessWrappedERC20Extensible public wLERC20e;
+    LosslessWrappedERC20Protected public wLERC20p;
     WrappedLosslessFactory public losslessFactory;
     LosslessApproveTransferExtension public approveExtension;
 
@@ -76,8 +78,8 @@ contract LosslessTestEnvironment is Test {
     uint256 public mintPeriod = 10 minutes;
     uint256 public burnPeriod = 10 minutes;
 
-    uint256 public stakingAmount = 1000;
-    uint256 public reportingAmount = 1000;
+    uint256 public stakingAmount = 10;
+    uint256 public reportingAmount = 10;
 
     uint256 public reportLifetime = 1 days;
 
@@ -123,12 +125,42 @@ contract LosslessTestEnvironment is Test {
 
     /// ----- Helpers ------
 
-    modifier withWrappedToken() {
-        vm.prank(tokenOwner);
-        wLERC20 = losslessFactory.registerExtensibleToken(testERC20);
+    modifier withExtensibleWrappedToken() {
+        vm.startPrank(tokenOwner);
+        wLERC20e = losslessFactory.registerExtensibleToken(testERC20);
 
-        assertEq(wLERC20.name(), "Lossless Wrapped Testing Token");
-        assertEq(wLERC20.symbol(), "wLssTEST");
+        assertEq(wLERC20e.name(), "Lossless Extensible Wrapped Testing Token");
+        assertEq(wLERC20e.symbol(), "wLTESTe");
+
+        testERC20.approve(address(wLERC20e), testERC20.balanceOf(tokenOwner));
+        wLERC20e.depositFor(
+            address(tokenOwner),
+            testERC20.balanceOf(tokenOwner) - 100
+        );
+        vm.stopPrank();
+
+        _;
+    }
+    modifier withProtectedWrappedToken() {
+        vm.startPrank(tokenOwner);
+        wLERC20p = losslessFactory.registerProtectedToken(
+            testERC20,
+            tokenOwner,
+            tokenOwner,
+            1 hours,
+            address(lssController)
+        );
+
+        assertEq(wLERC20p.name(), "Lossless Protected Wrapped Testing Token");
+        assertEq(wLERC20p.symbol(), "wLTEST");
+
+        testERC20.approve(address(wLERC20p), testERC20.balanceOf(tokenOwner));
+        wLERC20p.depositFor(
+            address(tokenOwner),
+            testERC20.balanceOf(tokenOwner) - 100
+        );
+
+        vm.stopPrank();
 
         _;
     }
@@ -276,7 +308,8 @@ contract LosslessTestEnvironment is Test {
     function generateReport(
         address reportedToken,
         address reportedAdr,
-        address reporter
+        address reporter,
+        ERC20 fromToken
     ) public returns (uint256) {
         vm.assume(reportedAdr != address(lssToken));
         vm.assume(reportedAdr != address(lssReporting));
@@ -284,7 +317,8 @@ contract LosslessTestEnvironment is Test {
         vm.assume(reportedAdr != address(lssController));
         vm.assume(reportedAdr != address(lssStaking));
         lssToken.transfer(reporter, reportingAmount);
-        testERC20.transfer(reportedAdr, reportedAmount);
+        vm.prank(tokenOwner);
+        fromToken.transfer(reportedAdr, reportedAmount);
         vm.warp(block.timestamp + settlementPeriod + 1);
         vm.startPrank(reporter);
         lssToken.approve(address(lssReporting), reportingAmount);
@@ -398,4 +432,14 @@ contract LosslessTestEnvironment is Test {
         vm.prank(retrieveTo);
         lssGovernance.retrieveFunds(reportId);
     }
+
+    /*     function fundAddresses(ERC20 fromToken) public {
+        vm.prank(tokenWwner);
+        fromToken.transfer(reporter, 500);
+        vm.prank(reporter);
+
+        for (uint256 i = 0; i < stakers.length; i++) {}
+
+        for (uint256 i = 0; i < committeeMembers.length; i++) {}
+    } */
 }
