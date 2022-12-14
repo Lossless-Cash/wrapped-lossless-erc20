@@ -4,7 +4,7 @@ pragma solidity ^0.8.4;
 import "./utils/losslessEnv.t.sol";
 
 contract WrappedERC20Test is LosslessTestEnvironment {
-    function tesRegularTransfer() public withWrappedToken {
+    function testExtensibleRegularTransfer() public withWrappedToken {
         vm.prank(tokenOwner);
         testERC20.approve(address(wLERC20), 10);
 
@@ -14,7 +14,7 @@ contract WrappedERC20Test is LosslessTestEnvironment {
         assertEq(wLERC20.balanceOf(tokenOwner), 10);
     }
 
-    function testRegisterApproveExtension() public withWrappedToken {
+    function testExtensibleRegisterApproveExtension() public withWrappedToken {
         wLERC20.registerExtension(address(approveExtension));
 
         address[] memory extensions = wLERC20.getExtensions();
@@ -32,7 +32,10 @@ contract WrappedERC20Test is LosslessTestEnvironment {
         assertEq(wLERC20.balanceOf(tokenOwner), 10);
     }
 
-    function testUnregisterApproveExtension() public withWrappedToken {
+    function testExtensibleUnregisterApproveExtension()
+        public
+        withWrappedToken
+    {
         wLERC20.registerExtension(address(approveExtension));
 
         address[] memory extensions = wLERC20.getExtensions();
@@ -48,7 +51,7 @@ contract WrappedERC20Test is LosslessTestEnvironment {
         assertEq(extensions.length, 0);
     }
 
-    function testBlacklistApproveExtension() public withWrappedToken {
+    function testExtensibleBlacklistApproveExtension() public withWrappedToken {
         wLERC20.blacklistExtension(address(approveExtension));
 
         vm.expectRevert(bytes("LSS: Extension blacklisted"));
