@@ -11,8 +11,6 @@ import "./Interfaces/ILosslessStaking.sol";
 import "./Interfaces/ILosslessReporting.sol";
 import "./Interfaces/IProtectionStrategy.sol";
 
-import "forge-std/console.sol";
-
 /// @title Lossless Controller Contract
 /// @notice The controller contract is in charge of the communication and senstive data among all Lossless Environment Smart Contracts
 contract LosslessControllerV3 is ILssController, Initializable, ContextUpgradeable, PausableUpgradeable {

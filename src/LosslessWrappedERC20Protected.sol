@@ -6,8 +6,6 @@ import "openzeppelin/contracts/token/ERC20/extensions/ERC20Wrapper.sol";
 import "lossless-v3/Interfaces/ILosslessController.sol";
 import "./Interfaces/ILosslessWrappedERC20.sol";
 
-import "forge-std/console.sol";
-
 contract LosslessWrappedERC20Protected is ERC20Wrapper, IWLERC20 {
     uint256 public constant VERSION = 1;
 
