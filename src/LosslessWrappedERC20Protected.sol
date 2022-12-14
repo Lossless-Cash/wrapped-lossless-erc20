@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.13;
+pragma solidity ^0.8.4;
 
 import "openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "openzeppelin/contracts/token/ERC20/extensions/ERC20Wrapper.sol";
 import "lossless-v3/Interfaces/ILosslessController.sol";
 import "./Interfaces/ILosslessWrappedERC20.sol";
 
-contract LosslessWrappedERC20 is ERC20Wrapper, IWLERC20 {
+contract LosslessWrappedERC20Protected is ERC20Wrapper, IWLERC20 {
     uint256 public constant VERSION = 1;
 
     address public recoveryAdmin;

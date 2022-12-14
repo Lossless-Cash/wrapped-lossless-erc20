@@ -3,3 +3,5 @@ forge-std/=lib/forge-std/src/
 lossless-v3/=lib/lossless-v3/contracts/
 openzeppelin-upgradeable/=lib/openzeppelin-contracts-upgradeable/
 openzeppelin/=lib/openzeppelin-contracts/
+wLERC20/=src/
+@openzeppelin/contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/contracts/
