@@ -6,7 +6,7 @@ interface IERC20ApproveExtension {
 
     function setApproveTransfer(address creator) external;
 
-    function approveTransfer(
+    function extensionApproveTransfer(
         address operator,
         address from,
         address to

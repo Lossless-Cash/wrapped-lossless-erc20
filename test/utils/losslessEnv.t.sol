@@ -93,7 +93,7 @@ contract LosslessTestEnvironment is Test {
     uint256 public walletDispute = 7 days;
 
     uint256 public dexTransferTreshold = 200;
-    uint256 public settlementTimelock = 1 minutes;
+    uint256 public settlementTimelock = 10 minutes;
 
     uint256 public reportedAmount = 100000;
 

@@ -5,6 +5,7 @@ import "openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "openzeppelin/contracts/token/ERC20/extensions/ERC20Wrapper.sol";
 import "./Interfaces/ILosslessExtensibleWrappedERC20.sol";
 import "./Interfaces/ILosslessERC20ApproveExtension.sol";
+import "./Interfaces/ILosslessTransfersExtension.sol";
 import "./LosslessExtensionCore.sol";
 
 contract LosslessWrappedERC20Extensible is
@@ -30,22 +31,6 @@ contract LosslessWrappedERC20Extensible is
         return
             interfaceId == type(ILosslessExtensibleWrappedERC20).interfaceId ||
             super.supportsInterface(interfaceId);
-    }
-
-    function _afterTokenTransfer(
-        address from,
-        address to,
-        uint256 amount
-    ) internal override(ERC20) {
-        super._afterTokenTransfer(from, to, amount);
-    }
-
-    function _beforeTokenTransfer(
-        address from,
-        address to,
-        uint256 amount
-    ) internal override(ERC20) {
-        _approveTransfer(from, to);
     }
 
     function _mint(address to, uint256 amount) internal override(ERC20) {
@@ -78,16 +63,26 @@ contract LosslessWrappedERC20Extensible is
         _blacklistExtension(extension);
     }
 
-    function _approveTransfer(address from, address to) internal {
+    function _afterTokenTransfer(
+        address from,
+        address to,
+        uint256 amount
+    ) internal override(ERC20) {
+        super._afterTokenTransfer(from, to, amount);
+    }
+
+    function _beforeTokenTransfer(
+        address from,
+        address to,
+        uint256 amount
+    ) internal override(ERC20) {
         if (_approveTransferBase != address(0)) {
-            require(
-                IERC20ApproveExtension(_approveTransferBase).approveTransfer(
-                    msg.sender,
-                    from,
-                    to
-                ),
-                "LSS: Extension approval failure"
-            );
+            IERC20ApproveExtension(_approveTransferBase)
+                .extensionApproveTransfer(msg.sender, from, to);
+        }
+        if (_beforeTransferBase != address(0)) {
+            ILosslessTransferExtension(_beforeTransferBase)
+                .extensionBeforeTransfer(from, amount);
         }
     }
 }

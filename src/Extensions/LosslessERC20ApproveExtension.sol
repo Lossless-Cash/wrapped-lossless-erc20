@@ -28,7 +28,7 @@ contract LosslessApproveTransferExtension is IERC20ApproveExtension {
         ILosslessExtensibleWrappedERC20(creator).setApproveTransferExtension();
     }
 
-    function approveTransfer(
+    function extensionApproveTransfer(
         address operator,
         address from,
         address to

@@ -27,6 +27,12 @@ abstract contract LosslessExtensionCore is
     mapping(address => bool) internal _extensionApproveTransfers;
 
     address internal _approveTransferBase;
+    address internal _beforeTransferBase;
+    address internal _afterTransferBase;
+    address internal _beforeMintBase;
+    address internal _afterMintBase;
+    address internal _beforeBurnBase;
+    address internal _afterBurnBase;
 
     bytes4 private constant _CREATOR_CORE_V1 = 0x28f10a21;
 
@@ -82,11 +88,6 @@ abstract contract LosslessExtensionCore is
         _extensions.add(extension);
     }
 
-    function setApproveTransferExtension() external override {
-        requireExtension();
-        _setApproveTransferBase(msg.sender);
-    }
-
     function _unregisterExtension(address extension) internal {
         emit ExtensionUnregistered(extension, msg.sender);
         _extensions.remove(extension);
@@ -123,6 +124,12 @@ abstract contract LosslessExtensionCore is
         return extension;
     }
 
+    // APROVAL EXTENSION
+    function setApproveTransferExtension() external override {
+        requireExtension();
+        _setApproveTransferBase(msg.sender);
+    }
+
     function _setApproveTransferBase(address extension) internal {
         _approveTransferBase = extension;
         emit ApproveTransferUpdated(extension);
@@ -130,5 +137,101 @@ abstract contract LosslessExtensionCore is
 
     function getApproveTransfer() external view returns (address) {
         return _approveTransferBase;
+    }
+
+    // BEFORE TRANSFER EXTENSION
+
+    function setBeforeTransferExtension() external override {
+        requireExtension();
+        _setBeforeTransferBase(msg.sender);
+    }
+
+    function _setBeforeTransferBase(address extension) internal {
+        _beforeTransferBase = extension;
+        emit BeforeTransferUpdated(extension);
+    }
+
+    function getBeforeTransfer() external view returns (address) {
+        return _beforeTransferBase;
+    }
+
+    // AFTER TRANSFER EXTENSION
+
+    function setAfterTransferExtension() external override {
+        requireExtension();
+        _setAfterTransferBase(msg.sender);
+    }
+
+    function _setAfterTransferBase(address extension) internal {
+        _afterTransferBase = extension;
+        emit AfterTransferUpdated(extension);
+    }
+
+    function getAfterTransfer() external view returns (address) {
+        return _afterTransferBase;
+    }
+
+    // BEFORE MINT EXTENSION
+
+    function setBeforeMintExtension() external override {
+        requireExtension();
+        _setBeforeMintBase(msg.sender);
+    }
+
+    function _setBeforeMintBase(address extension) internal {
+        _beforeMintBase = extension;
+        emit BeforeMintUpdated(extension);
+    }
+
+    function getBeforeMint() external view returns (address) {
+        return _beforeMintBase;
+    }
+
+    // AFTER MINT EXTENSION
+
+    function setAfterMintExtension() external override {
+        requireExtension();
+        _setAfterMintBase(msg.sender);
+    }
+
+    function _setAfterMintBase(address extension) internal {
+        _afterMintBase = extension;
+        emit AfterMintUpdated(extension);
+    }
+
+    function getAfterMint() external view returns (address) {
+        return _afterMintBase;
+    }
+
+    // BEFORE BURN EXTENSION
+
+    function setBeforeBurnExtension() external override {
+        requireExtension();
+        _setBeforeBurnBase(msg.sender);
+    }
+
+    function _setBeforeBurnBase(address extension) internal {
+        _beforeBurnBase = extension;
+        emit BeforeBurnUpdated(extension);
+    }
+
+    function getBeforeBurn() external view returns (address) {
+        return _beforeBurnBase;
+    }
+
+    // AFTER BURN EXTENSION
+
+    function setAfterBurnExtension() external override {
+        requireExtension();
+        _setAfterBurnBase(msg.sender);
+    }
+
+    function _setAfterBurnBase(address extension) internal {
+        _afterBurnBase = extension;
+        emit AfterBurnUpdated(extension);
+    }
+
+    function getAfterBurn() external view returns (address) {
+        return _afterBurnBase;
     }
 }

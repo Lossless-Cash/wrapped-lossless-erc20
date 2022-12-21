@@ -17,12 +17,18 @@ interface ICoreExtension is IERC165 {
         address indexed sender
     );
 
-    event ApproveTransferUpdated(address extension);
-
     event ExtensionApproveTransferUpdated(
         address indexed extension,
         bool enabled
     );
+
+    event ApproveTransferUpdated(address extension);
+    event BeforeTransferUpdated(address extension);
+    event AfterTransferUpdated(address extension);
+    event BeforeMintUpdated(address extension);
+    event AfterMintUpdated(address extension);
+    event BeforeBurnUpdated(address extension);
+    event AfterBurnUpdated(address extension);
 
     function getExtensions() external view returns (address[] memory);
 
@@ -33,4 +39,16 @@ interface ICoreExtension is IERC165 {
     function blacklistExtension(address extension) external;
 
     function setApproveTransferExtension() external;
+
+    function setBeforeTransferExtension() external;
+
+    function setAfterTransferExtension() external;
+
+    function setBeforeMintExtension() external;
+
+    function setAfterMintExtension() external;
+
+    function setBeforeBurnExtension() external;
+
+    function setAfterBurnExtension() external;
 }
