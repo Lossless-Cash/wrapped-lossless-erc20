@@ -12,8 +12,10 @@ import "lossless-v3/LosslessReporting.sol";
 import "lossless-v3/LosslessStaking.sol";
 
 import "wLERC20/Mocks/ERC20Mock.sol";
+import "wLERC20/Mocks/ERC20OwnableMock.sol";
 import "wLERC20/LosslessWrappedERC20Extensible.sol";
 import "wLERC20/LosslessWrappedERC20Protected.sol";
+import "wLERC20/LosslessWrappedERC20ProtectedAdminless.sol";
 import "wLERC20/LosslessWrappingFactory.sol";
 import "wLERC20/Extensions/LosslessERC20ApproveExtension.sol";
 
@@ -39,10 +41,12 @@ contract LosslessTestEnvironment is Test {
     ProxyAdmin private proxyAdminGov;
 
     LERC20 public lssToken;
-    TestToken public testERC20;
+    OwnableTestToken public testERC20;
+    TestToken public adminlessTestERC20;
 
     LosslessWrappedERC20Extensible public wLERC20e;
     LosslessWrappedERC20Protected public wLERC20p;
+    LosslessWrappedERC20ProtectedAdminless public wLERC20ap;
     WrappedLosslessFactory public losslessFactory;
     LosslessApproveTransferExtension public approveExtension;
 
@@ -164,6 +168,33 @@ contract LosslessTestEnvironment is Test {
 
         _;
     }
+    modifier withAdminlessProtectedWrappedToken() {
+        vm.startPrank(tokenOwner);
+        wLERC20ap = losslessFactory.registerAdminlessProtectedToken(
+            adminlessTestERC20,
+            1 hours,
+            address(lssController)
+        );
+
+        assertEq(
+            wLERC20ap.name(),
+            "Lossless Adminless Protected Wrapped Testing Token"
+        );
+        assertEq(wLERC20ap.symbol(), "waLTEST");
+
+        adminlessTestERC20.approve(
+            address(wLERC20ap),
+            adminlessTestERC20.balanceOf(tokenOwner)
+        );
+        wLERC20ap.depositFor(
+            address(tokenOwner),
+            adminlessTestERC20.balanceOf(tokenOwner) - 100
+        );
+
+        vm.stopPrank();
+
+        _;
+    }
 
     /// @notice Sets up Lossless Controller
     function setUpController() public {
@@ -204,8 +235,14 @@ contract LosslessTestEnvironment is Test {
             address(lssController)
         );
 
-        vm.prank(tokenOwner);
-        testERC20 = new TestToken("Testing Token", "TEST", totalSupply);
+        vm.startPrank(tokenOwner);
+        testERC20 = new OwnableTestToken("Testing Token", "TEST", totalSupply);
+        adminlessTestERC20 = new TestToken(
+            "Testing Token",
+            "TEST",
+            totalSupply
+        );
+        vm.stopPrank();
     }
 
     /// @notice Sets up Lossless Reporting
