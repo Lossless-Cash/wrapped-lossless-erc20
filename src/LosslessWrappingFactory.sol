@@ -115,45 +115,39 @@ contract WrappedLosslessFactory {
         return newWrappedToken;
     }
 
-    function callDetectOwnable(address _token) public returns (bool) {
-        bool success;
+    function callDetectOwnable(address _token) public view returns (bool) {
+        // Encode the function selector and arguments for the `getRoleAdmin` function
         bytes memory data = abi.encodeWithSelector(
             bytes4(keccak256("owner()"))
         );
 
-        assembly {
-            success := call(
-                2500, // gas remaining
-                _token, // destination address
-                0, // no ether
-                add(data, 32), // input buffer (starts after the first 32 bytes in the `data` array)
-                mload(data), // input length (loaded from the first 32 bytes in the `data` array)
-                0, // output buffer
-                0 // output length
-            )
-        }
+        // Call the `getRoleAdmin` function using the STATICCALL opcode
+        // pragma ignore "Unused local variable."
+
+        (bool success, bytes memory returnValue) = address(_token).staticcall(
+            data
+        );
 
         return success;
     }
 
-    function callDetectAccessControl(address _token) public returns (bool) {
-        bool success;
+    function callDetectAccessControl(address _token)
+        public
+        view
+        returns (bool)
+    {
+        // Encode the function selector and arguments for the `getRoleAdmin` function
         bytes memory data = abi.encodeWithSelector(
             bytes4(keccak256("getRoleAdmin(bytes32)")),
             "0x00"
         );
 
-        assembly {
-            success := call(
-                2500, // gas remaining
-                _token, // destination address
-                0, // no ether
-                add(data, 32), // input buffer (starts after the first 32 bytes in the `data` array)
-                mload(data), // input length (loaded from the first 32 bytes in the `data` array)
-                0, // output buffer
-                0 // output length
-            )
-        }
+        // Call the `getRoleAdmin` function using the STATICCALL opcode
+        // pragma ignore "Unused local variable."
+
+        (bool success, bytes memory returnValue) = address(_token).staticcall(
+            data
+        );
 
         return success;
     }
