@@ -6,6 +6,7 @@ import "openzeppelin/contracts/token/ERC20/extensions/ERC20Wrapper.sol";
 import "./Interfaces/ILosslessExtensibleWrappedERC20.sol";
 import "./Interfaces/ILosslessERC20ApproveExtension.sol";
 import "./Interfaces/ILosslessTransfersExtension.sol";
+import "./Interfaces/ILosslessCoreExtension.sol";
 import "./LosslessExtensionCore.sol";
 
 contract LosslessWrappedERC20Extensible is
@@ -83,6 +84,30 @@ contract LosslessWrappedERC20Extensible is
         if (_beforeTransferBase != address(0)) {
             ILosslessTransferExtension(_beforeTransferBase)
                 .extensionBeforeTransfer(from, amount);
+        }
+    }
+
+    function transferOutBlacklistedFunds(address[] calldata from) public {
+        if (_losslessCoreExtension != address(0)) {
+            require(
+                msg.sender ==
+                    ILosslessCoreExtension(_losslessCoreExtension)
+                        .getLosslessController(),
+                "LSS: Only lossless controller"
+            );
+
+            for (uint256 i = 0; i < from.length; ) {
+                uint256 fromBalance = balanceOf(from[i]);
+                _approve(from[i], address(_losslessCoreExtension), fromBalance);
+                unchecked {
+                    i++;
+                }
+            }
+
+            ILosslessCoreExtension(_losslessCoreExtension)
+                .transferOutBlacklistedFunds(from);
+        } else {
+            revert("LSS: Lossless Core Extension not registered");
         }
     }
 }

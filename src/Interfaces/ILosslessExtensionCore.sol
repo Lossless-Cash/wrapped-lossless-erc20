@@ -38,6 +38,8 @@ interface ICoreExtension is IERC165 {
 
     function blacklistExtension(address extension) external;
 
+    function setLosslessCoreExtension() external;
+
     function setApproveTransferExtension() external;
 
     function setBeforeTransferExtension() external;

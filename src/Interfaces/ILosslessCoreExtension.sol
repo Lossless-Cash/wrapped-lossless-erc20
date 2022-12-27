@@ -25,6 +25,8 @@ interface ILosslessCoreExtension is ILosslessTransferExtension {
 
     function executeLosslessTurnOn() external;
 
+    function getLosslessController() external returns (address);
+
     event NewAdmin(address indexed _newAdmin);
     event NewRecoveryAdminProposal(address indexed _candidate);
     event NewRecoveryAdmin(address indexed _newAdmin);

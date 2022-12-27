@@ -30,7 +30,8 @@ contract WrappedERC20Test is LosslessTestEnvironment {
             tokenOwner,
             tokenOwner,
             settlementTimelock,
-            address(lssController)
+            address(lssController),
+            address(wLERC20e)
         );
 
         wLERC20e.registerExtension(address(coreExtension));
@@ -39,9 +40,10 @@ contract WrappedERC20Test is LosslessTestEnvironment {
 
         assertEq(extensions[0], address(coreExtension));
 
-        coreExtension.setBeforeTransfer(address(wLERC20e));
+        coreExtension.setLosslessCoreExtension(address(wLERC20e));
 
         assertEq(wLERC20e.getBeforeTransfer(), address(coreExtension));
+        assertEq(wLERC20e.getLosslessCore(), address(coreExtension));
 
         vm.stopPrank();
     }
@@ -52,5 +54,25 @@ contract WrappedERC20Test is LosslessTestEnvironment {
 
         vm.prank(address(500));
         wLERC20e.transfer(address(501), 500);
+    }
+
+    function testCoreExtensionMembersClaimAllParticipating()
+        public
+        lssCoreExtended
+    {
+        uint256[5] memory memberBalances;
+
+        for (uint256 i = 0; i < committeeMembers.length; i++) {
+            memberBalances[i] = wLERC20e.balanceOf(committeeMembers[i]);
+        }
+
+        uint256 reportId = generateReport(
+            address(wLERC20e),
+            maliciousActor,
+            reporter,
+            wLERC20e
+        );
+
+        solveReportPositively(reportId);
     }
 }

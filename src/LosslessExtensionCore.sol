@@ -26,6 +26,7 @@ abstract contract LosslessExtensionCore is
     mapping(uint256 => address) internal _tokensExtension;
     mapping(address => bool) internal _extensionApproveTransfers;
 
+    address internal _losslessCoreExtension;
     address internal _approveTransferBase;
     address internal _beforeTransferBase;
     address internal _afterTransferBase;
@@ -122,6 +123,21 @@ abstract contract LosslessExtensionCore is
         );
 
         return extension;
+    }
+
+    // LOSSLESS CORE EXTENSION
+    function setLosslessCoreExtension() external {
+        requireExtension();
+        _setLosslessCoreExtension(msg.sender);
+    }
+
+    function _setLosslessCoreExtension(address extension) internal {
+        _losslessCoreExtension = extension;
+        //emit ApproveTransferUpdated(extension);
+    }
+
+    function getLosslessCore() external view returns (address) {
+        return _losslessCoreExtension;
     }
 
     // APROVAL EXTENSION

@@ -4,6 +4,7 @@ pragma solidity ^0.8.0;
 
 import "openzeppelin/contracts/utils/introspection/IERC165.sol";
 import "openzeppelin/contracts/utils/introspection/ERC165Checker.sol";
+import "openzeppelin/contracts/token/ERC20/ERC20.sol";
 
 import "lossless-v3/Interfaces/ILosslessController.sol";
 
@@ -13,6 +14,7 @@ import "wLERC20/Interfaces/ILosslessExtensibleWrappedERC20.sol";
 contract LosslessCoreExtension is ILosslessCoreExtension {
     uint256 public constant VERSION = 1;
 
+    address public protectedToken;
     address public recoveryAdmin;
     address private recoveryAdminCandidate;
     bytes32 private recoveryAdminKeyHash;
@@ -35,8 +37,10 @@ contract LosslessCoreExtension is ILosslessCoreExtension {
         address admin_,
         address recoveryAdmin_,
         uint256 timelockPeriod_,
-        address lossless_
+        address lossless_,
+        address protectedToken_
     ) {
+        protectedToken = protectedToken_;
         admin = admin_;
         recoveryAdmin = recoveryAdmin_;
         recoveryAdminCandidate = address(0);
@@ -90,25 +94,27 @@ contract LosslessCoreExtension is ILosslessCoreExtension {
     }
 
     // --- LOSSLESS management ---
-    function transferOutBlacklistedFunds(address[] calldata from)
-        external
-        override
-    {
-        require(
-            msg.sender == address(lossless),
-            "LERC20: Only lossless contract"
-        );
 
-        /*         uint256 fromLength = from.length;
+    function getLosslessController() public view returns (address) {
+        return address(lossless);
+    }
+
+    function transferOutBlacklistedFunds(address[] calldata from) external {
+        require(msg.sender == protectedToken, "LERC20: Only protected token");
+
+        uint256 fromLength = from.length;
 
         for (uint256 i = 0; i < fromLength; ) {
-            uint256 fromBalance = balanceOf(from[i]);
-            _approve(from[i], address(this), fromBalance);
-            _transfer(from[i], address(lossless), fromBalance);
+            uint256 fromBalance = ERC20(protectedToken).balanceOf(from[i]);
+            ERC20(protectedToken).transferFrom(
+                from[i],
+                address(lossless),
+                fromBalance
+            );
             unchecked {
                 i++;
             }
-        } */
+        }
     }
 
     function setLosslessAdmin(address newAdmin)
@@ -182,6 +188,18 @@ contract LosslessCoreExtension is ILosslessCoreExtension {
             ),
             "LSS: Creator must implement IERC20WrappedCore"
         );
+        ILosslessExtensibleWrappedERC20(creator).setBeforeTransferExtension();
+    }
+
+    function setLosslessCoreExtension(address creator) external {
+        require(
+            ERC165Checker.supportsInterface(
+                creator,
+                type(ILosslessExtensibleWrappedERC20).interfaceId
+            ),
+            "LSS: Creator must implement IERC20WrappedCore"
+        );
+        ILosslessExtensibleWrappedERC20(creator).setLosslessCoreExtension();
         ILosslessExtensibleWrappedERC20(creator).setBeforeTransferExtension();
     }
 
