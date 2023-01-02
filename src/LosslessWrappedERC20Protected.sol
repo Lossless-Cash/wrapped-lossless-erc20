@@ -6,6 +6,8 @@ import "openzeppelin/contracts/token/ERC20/extensions/ERC20Wrapper.sol";
 import "lossless-v3/Interfaces/ILosslessController.sol";
 import "./Interfaces/ILosslessWrappedERC20.sol";
 
+/// @title Lossless Protected Wrapped ERC20
+/// @notice This contract wraps an ERC20 with Lossless Core Protocol
 contract LosslessWrappedERC20Protected is ERC20Wrapper, IWLERC20 {
     uint256 public constant VERSION = 1;
 
@@ -95,6 +97,8 @@ contract LosslessWrappedERC20Protected is ERC20Wrapper, IWLERC20 {
     }
 
     // --- LOSSLESS management ---
+    /// @notice This function is for transfering out funds when a report is solved positively
+    /// @param from blacklisted address
     function transferOutBlacklistedFunds(address[] calldata from)
         external
         override
@@ -116,6 +120,9 @@ contract LosslessWrappedERC20Protected is ERC20Wrapper, IWLERC20 {
         }
     }
 
+    /// @notice This function is for setting the admin that interacts with lossless protocol
+    /// @dev Only can be called by recovery admin
+    /// @param newAdmin new admin address
     function setLosslessAdmin(address newAdmin)
         external
         override
@@ -126,6 +133,10 @@ contract LosslessWrappedERC20Protected is ERC20Wrapper, IWLERC20 {
         admin = newAdmin;
     }
 
+    /// @notice This function is for transfering the recovery admin role
+    /// @dev Only can be called by recovery admin
+    /// @param candidate New recovery admin address
+    /// @param keyHash Key hash to accept transfer
     function transferRecoveryAdminOwnership(address candidate, bytes32 keyHash)
         external
         override
@@ -136,6 +147,9 @@ contract LosslessWrappedERC20Protected is ERC20Wrapper, IWLERC20 {
         emit NewRecoveryAdminProposal(candidate);
     }
 
+    /// @notice This function is for accepting the revoery admin ownership transfer
+    /// @dev Only can be called by recovery admin
+    /// @param key Key hash to accept transfer
     function acceptRecoveryAdminOwnership(bytes memory key) external override {
         require(
             _msgSender() == recoveryAdminCandidate,
@@ -147,6 +161,8 @@ contract LosslessWrappedERC20Protected is ERC20Wrapper, IWLERC20 {
         recoveryAdminCandidate = address(0);
     }
 
+    /// @notice This function is for proposing turning off lossless
+    /// @dev Only can be called by recovery admin
     function proposeLosslessTurnOff() external override onlyRecoveryAdmin {
         require(
             losslessTurnOffTimestamp == 0,
@@ -157,6 +173,8 @@ contract LosslessWrappedERC20Protected is ERC20Wrapper, IWLERC20 {
         emit LosslessTurnOffProposal(losslessTurnOffTimestamp);
     }
 
+    /// @notice This function is for executing the lossless turn off
+    /// @dev Only can be called by recovery admin and after the set period has passed
     function executeLosslessTurnOff() external override onlyRecoveryAdmin {
         require(losslessTurnOffTimestamp != 0, "LERC20: TurnOff not proposed");
         require(
@@ -168,6 +186,8 @@ contract LosslessWrappedERC20Protected is ERC20Wrapper, IWLERC20 {
         emit LosslessOff();
     }
 
+    /// @notice This function is for turning on lossless
+    /// @dev Only can be called by recovery admin
     function executeLosslessTurnOn() external override onlyRecoveryAdmin {
         require(!isLosslessOn, "LERC20: Lossless already on");
         losslessTurnOffTimestamp = 0;
@@ -175,10 +195,18 @@ contract LosslessWrappedERC20Protected is ERC20Wrapper, IWLERC20 {
         emit LosslessOn();
     }
 
+    /// @notice This function is for getting the current admin
+    /// @return address admin address
     function getAdmin() public view virtual returns (address) {
         return admin;
     }
 
+    /// @notice This function corresponds to the regular transfer
+    /// @dev This will call the lssTransfer modifier which perofrms all the necessary checks
+    ///      with the Lossless controller
+    /// @param recipient receiver address
+    /// @param amount amount to transfer
+    /// @return bool true if the transfer was successful
     function transfer(address recipient, uint256 amount)
         public
         virtual
@@ -190,6 +218,12 @@ contract LosslessWrappedERC20Protected is ERC20Wrapper, IWLERC20 {
         return true;
     }
 
+    /// @notice This function corresponds to the regular approve
+    /// @dev This will call the lssAprove modifier which perofrms all the necessary checks
+    ///      with the Lossless controller
+    /// @param spender sender address
+    /// @param amount amount to transfer
+    /// @return bool true if the transfer was approved successfully
     function approve(address spender, uint256 amount)
         public
         virtual
@@ -201,6 +235,12 @@ contract LosslessWrappedERC20Protected is ERC20Wrapper, IWLERC20 {
         return true;
     }
 
+    /// @notice This function corresponds to the regular transferFrom
+    /// @dev This will call the lssTransferFrom modifier which perofrms all the necessary checks
+    ///      with the Lossless controller
+    /// @param sender sender address
+    /// @param recipient receiver address
+    /// @param amount amount to transfer
     function transferFrom(
         address sender,
         address recipient,
@@ -224,6 +264,12 @@ contract LosslessWrappedERC20Protected is ERC20Wrapper, IWLERC20 {
         return true;
     }
 
+    /// @notice This function corresponds to the regular increase allowance
+    /// @dev This will call the lssIncreaseAllowance modifier which perofrms all the necessary checks
+    ///      with the Lossless controller
+    /// @param spender sender address
+    /// @param addedValue amount to increase allowance
+    /// @return bool true if the allwance increase was successful
     function increaseAllowance(address spender, uint256 addedValue)
         public
         virtual
@@ -235,6 +281,12 @@ contract LosslessWrappedERC20Protected is ERC20Wrapper, IWLERC20 {
         return true;
     }
 
+    /// @notice This function corresponds to the regular decrease allowance
+    /// @dev This will call the lssDecreaseAllowance modifier which perofrms all the necessary checks
+    ///      with the Lossless controller
+    /// @param spender sender address
+    /// @param subtractedValue amount to decrease allowance
+    /// @return bool true if the allwance decrease was successful
     function decreaseAllowance(address spender, uint256 subtractedValue)
         public
         virtual
