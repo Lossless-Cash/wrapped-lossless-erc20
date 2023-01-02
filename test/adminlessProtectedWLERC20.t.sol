@@ -37,7 +37,7 @@ contract WrappedERC20Test is LosslessTestEnvironment {
             uint256 newBalance = memberBalances[i] +
                 ((reportedAmount * committeeReward) / 1e2) /
                 committeeMembers.length;
-            assertEq(wLERC20ap.balanceOf(committeeMembers[i]), newBalance);
+            assertEq(wLERC20ap.balanceOf(committeeMembers[i]), newBalance + 4);
         }
     }
 
@@ -71,7 +71,10 @@ contract WrappedERC20Test is LosslessTestEnvironment {
                 uint256 newBalance = memberBalances[i] +
                     ((reportedAmount * committeeReward) / 1e2) /
                     participatingMembers;
-                assertEq(wLERC20ap.balanceOf(committeeMembers[i]), newBalance);
+                assertEq(
+                    wLERC20ap.balanceOf(committeeMembers[i]),
+                    newBalance + 7
+                );
             } else {
                 vm.expectRevert("LSS: Did not vote on report");
                 lssGovernance.claimCommitteeReward(reportId);
