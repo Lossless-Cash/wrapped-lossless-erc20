@@ -4,7 +4,51 @@ pragma solidity ^0.8.4;
 import "./utils/losslessEnv.t.sol";
 
 contract WrappedERC20Test is LosslessTestEnvironment {
+    address[] retrieveFrom;
+
+    /// @notice Test deployment
     function testProtectedWLERC20() public withProtectedWrappedToken {}
+
+    function testProtectedTransferOutBlacklistedFundsFromNotController()
+        public
+    {
+        address[] storage _retrieveFrom = retrieveFrom;
+        _retrieveFrom.push(maliciousActor);
+
+        vm.expectRevert();
+        vm.prank(tokenOwner);
+        wLERC20p.transferOutBlacklistedFunds(_retrieveFrom);
+    }
+
+    function testProtectedSetLosslessAdminFromNonRecovery()
+        public
+        withProtectedWrappedToken
+    {
+        vm.prank(maliciousActor);
+        vm.expectRevert();
+        wLERC20p.setLosslessAdmin(maliciousActor);
+    }
+
+    function testProtectedTransferRecoveryAdminFromNonRecovery()
+        public
+        withProtectedWrappedToken
+    {
+        vm.prank(maliciousActor);
+        vm.expectRevert();
+        wLERC20p.transferRecoveryAdminOwnership(
+            maliciousActor,
+            bytes32("12345")
+        );
+    }
+
+    function testProtectedProposeLosslessTurnOffFromNonRecovery()
+        public
+        withProtectedWrappedToken
+    {
+        vm.prank(maliciousActor);
+        vm.expectRevert();
+        wLERC20p.proposeLosslessTurnOff();
+    }
 
     /// @notice Test Committee members claiming their rewards when all participating
     /// @dev Should not revert and update balances correctly

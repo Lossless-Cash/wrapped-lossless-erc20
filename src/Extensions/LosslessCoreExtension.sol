@@ -11,6 +11,8 @@ import "lossless-v3/Interfaces/ILosslessController.sol";
 import "wLERC20/Interfaces/ILosslessCoreExtension.sol";
 import "wLERC20/Interfaces/ILosslessExtensibleWrappedERC20.sol";
 
+/// @title Lossless Core Extension for Extendable Wrapped ERC20s
+/// @notice This extension adds Lossless Core protocol to the wrapped token
 contract LosslessCoreExtension is ILosslessCoreExtension {
     uint256 public constant VERSION = 1;
 
@@ -24,6 +26,9 @@ contract LosslessCoreExtension is ILosslessCoreExtension {
     bool public isLosslessOn = true;
     ILssController public lossless;
 
+    /// @notice This function is for checking if the contract allows an interface
+    /// @param interfaceId Interface ID
+    /// @return true if the interface id is accepted
     function supportsInterface(bytes4 interfaceId)
         public
         view
@@ -95,10 +100,14 @@ contract LosslessCoreExtension is ILosslessCoreExtension {
 
     // --- LOSSLESS management ---
 
+    /// @notice This function is for getting the current lossless controller
+    /// @return address lossless controller address
     function getLosslessController() public view returns (address) {
         return address(lossless);
     }
 
+    /// @notice This function is for transfering out funds when a report is solved positively
+    /// @param from blacklisted address
     function transferOutBlacklistedFunds(address[] calldata from) external {
         require(msg.sender == protectedToken, "LERC20: Only protected token");
 
@@ -117,6 +126,9 @@ contract LosslessCoreExtension is ILosslessCoreExtension {
         }
     }
 
+    /// @notice This function is for setting the admin that interacts with lossless protocol
+    /// @dev Only can be called by recovery admin
+    /// @param newAdmin new admin address
     function setLosslessAdmin(address newAdmin)
         external
         override
@@ -127,6 +139,10 @@ contract LosslessCoreExtension is ILosslessCoreExtension {
         admin = newAdmin;
     }
 
+    /// @notice This function is for transfering the recovery admin role
+    /// @dev Only can be called by recovery admin
+    /// @param candidate New recovery admin address
+    /// @param keyHash Key hash to accept transfer
     function transferRecoveryAdminOwnership(address candidate, bytes32 keyHash)
         external
         override
@@ -137,6 +153,9 @@ contract LosslessCoreExtension is ILosslessCoreExtension {
         emit NewRecoveryAdminProposal(candidate);
     }
 
+    /// @notice This function is for accepting the revoery admin ownership transfer
+    /// @dev Only can be called by recovery admin
+    /// @param key Key hash to accept transfer
     function acceptRecoveryAdminOwnership(bytes memory key) external override {
         require(
             msg.sender == recoveryAdminCandidate,
@@ -148,6 +167,8 @@ contract LosslessCoreExtension is ILosslessCoreExtension {
         recoveryAdminCandidate = address(0);
     }
 
+    /// @notice This function is for proposing turning off lossless
+    /// @dev Only can be called by recovery admin
     function proposeLosslessTurnOff() external override onlyRecoveryAdmin {
         require(
             losslessTurnOffTimestamp == 0,
@@ -158,6 +179,8 @@ contract LosslessCoreExtension is ILosslessCoreExtension {
         emit LosslessTurnOffProposal(losslessTurnOffTimestamp);
     }
 
+    /// @notice This function is for executing the lossless turn off
+    /// @dev Only can be called by recovery admin and after the set period has passed
     function executeLosslessTurnOff() external override onlyRecoveryAdmin {
         require(losslessTurnOffTimestamp != 0, "LERC20: TurnOff not proposed");
         require(
@@ -169,6 +192,8 @@ contract LosslessCoreExtension is ILosslessCoreExtension {
         emit LosslessOff();
     }
 
+    /// @notice This function is for turning on lossless
+    /// @dev Only can be called by recovery admin
     function executeLosslessTurnOn() external override onlyRecoveryAdmin {
         require(!isLosslessOn, "LERC20: Lossless already on");
         losslessTurnOffTimestamp = 0;
@@ -176,11 +201,20 @@ contract LosslessCoreExtension is ILosslessCoreExtension {
         emit LosslessOn();
     }
 
+    /// @notice This function is for getting the current admin
+    /// @return address admin address
     function getAdmin() public view virtual returns (address) {
         return admin;
     }
 
-    function setBeforeTransfer(address creator) external override {
+    /// @notice This function will set the extension as the transfer base for the underlying token
+    /// @dev This can only be called by the recovery admin
+    /// @param creator underlying token address
+    function setBeforeTransfer(address creator)
+        external
+        override
+        onlyRecoveryAdmin
+    {
         require(
             ERC165Checker.supportsInterface(
                 creator,
@@ -191,7 +225,13 @@ contract LosslessCoreExtension is ILosslessCoreExtension {
         ILosslessExtensibleWrappedERC20(creator).setBeforeTransferExtension();
     }
 
-    function setLosslessCoreExtension(address creator) external {
+    /// @notice This function will set the lossless core extension and the transfer base
+    /// @dev This can only be called by the recovery admin
+    /// @param creator underlying token address
+    function setLosslessCoreExtension(address creator)
+        external
+        onlyRecoveryAdmin
+    {
         require(
             ERC165Checker.supportsInterface(
                 creator,
@@ -203,6 +243,9 @@ contract LosslessCoreExtension is ILosslessCoreExtension {
         ILosslessExtensibleWrappedERC20(creator).setBeforeTransferExtension();
     }
 
+    /// @notice This function executes the lossless controller before transfer
+    /// @param recipient recipient address
+    /// @param amount amount to transfer
     function extensionBeforeTransfer(address recipient, uint256 amount)
         external
         override
@@ -212,6 +255,10 @@ contract LosslessCoreExtension is ILosslessCoreExtension {
         }
     }
 
+    /// @notice This function executes the lossless controller before transfer from
+    /// @param sender sender address
+    /// @param recipient recipient address
+    /// @param amount amount to transfer
     function extensionBeforeTransferFrom(
         address sender,
         address recipient,
