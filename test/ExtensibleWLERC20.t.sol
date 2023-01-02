@@ -11,7 +11,7 @@ contract WrappedERC20Test is LosslessTestEnvironment {
         vm.prank(tokenOwner);
         wLERC20e.depositFor(tokenOwner, 10);
 
-        assertEq(wLERC20e.balanceOf(tokenOwner), totalSupply - 100 + 10);
+        assertEq(wLERC20e.balanceOf(tokenOwner), (totalSupply / 5) - 1100 + 10);
     }
 
     function testExtensibleRegisterApproveExtension()
@@ -32,7 +32,7 @@ contract WrappedERC20Test is LosslessTestEnvironment {
         vm.prank(tokenOwner);
         wLERC20e.depositFor(tokenOwner, 10);
 
-        assertEq(wLERC20e.balanceOf(tokenOwner), totalSupply - 100 + 10);
+        assertEq(wLERC20e.balanceOf(tokenOwner), (totalSupply / 5) - 1100 + 10);
     }
 
     function testExtensibleUnregisterApproveExtension()

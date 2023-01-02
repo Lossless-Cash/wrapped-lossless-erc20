@@ -18,6 +18,7 @@ import "wLERC20/LosslessWrappedERC20Protected.sol";
 import "wLERC20/LosslessWrappedERC20ProtectedAdminless.sol";
 import "wLERC20/LosslessWrappingFactory.sol";
 import "wLERC20/Extensions/LosslessERC20ApproveExtension.sol";
+import "wLERC20/Extensions/LosslessCoreExtension.sol";
 
 import "forge-std/Test.sol";
 
@@ -49,6 +50,7 @@ contract LosslessTestEnvironment is Test {
     LosslessWrappedERC20ProtectedAdminless public wLERC20ap;
     WrappedLosslessFactory public losslessFactory;
     LosslessApproveTransferExtension public approveExtension;
+    LosslessCoreExtension public coreExtension;
 
     address public dex = address(99);
 
@@ -139,8 +141,10 @@ contract LosslessTestEnvironment is Test {
         testERC20.approve(address(wLERC20e), testERC20.balanceOf(tokenOwner));
         wLERC20e.depositFor(
             address(tokenOwner),
-            testERC20.balanceOf(tokenOwner) - 100
+            (testERC20.balanceOf(tokenOwner) / 5) - 100
         );
+
+        wLERC20e.transfer(address(maliciousActor), 1000);
         vm.stopPrank();
 
         _;
@@ -159,10 +163,13 @@ contract LosslessTestEnvironment is Test {
         assertEq(wLERC20p.symbol(), "wLTEST");
 
         testERC20.approve(address(wLERC20p), testERC20.balanceOf(tokenOwner));
+
         wLERC20p.depositFor(
             address(tokenOwner),
-            testERC20.balanceOf(tokenOwner) - 100
+            (testERC20.balanceOf(tokenOwner) / 5) - 100
         );
+
+        wLERC20p.transfer(address(maliciousActor), 1000);
 
         vm.stopPrank();
 
@@ -186,13 +193,28 @@ contract LosslessTestEnvironment is Test {
             address(wLERC20ap),
             adminlessTestERC20.balanceOf(tokenOwner)
         );
+
         wLERC20ap.depositFor(
             address(tokenOwner),
-            adminlessTestERC20.balanceOf(tokenOwner) - 100
+            (adminlessTestERC20.balanceOf(tokenOwner) / 5) - 100
         );
+
+        wLERC20ap.transfer(address(maliciousActor), 1000);
 
         vm.stopPrank();
 
+        _;
+    }
+
+    modifier lssCoreExtended() {
+        setUpCoreExtensionTests();
+        _;
+    }
+
+    modifier withReportsGenerated() {
+        generateReport(address(wLERC20ap), maliciousActor, reporter, wLERC20ap);
+        generateReport(address(wLERC20p), maliciousActor, reporter, wLERC20p);
+        generateReport(address(wLERC20e), maliciousActor, reporter, wLERC20e);
         _;
     }
 
@@ -470,13 +492,38 @@ contract LosslessTestEnvironment is Test {
         lssGovernance.retrieveFunds(reportId);
     }
 
-    /*     function fundAddresses(ERC20 fromToken) public {
-        vm.prank(tokenWwner);
-        fromToken.transfer(reporter, 500);
-        vm.prank(reporter);
+    function setUpCoreExtensionTests() public {
+        vm.startPrank(tokenOwner);
+        wLERC20e = losslessFactory.registerExtensibleToken(testERC20);
 
-        for (uint256 i = 0; i < stakers.length; i++) {}
+        assertEq(wLERC20e.name(), "Lossless Extensible Wrapped Testing Token");
+        assertEq(wLERC20e.symbol(), "wLTESTe");
 
-        for (uint256 i = 0; i < committeeMembers.length; i++) {}
-    } */
+        testERC20.approve(address(wLERC20e), testERC20.balanceOf(tokenOwner));
+        wLERC20e.depositFor(
+            address(tokenOwner),
+            (testERC20.balanceOf(tokenOwner) / 5) - 100
+        );
+
+        coreExtension = new LosslessCoreExtension(
+            tokenOwner,
+            tokenOwner,
+            settlementTimelock,
+            address(lssController),
+            address(wLERC20e)
+        );
+
+        wLERC20e.registerExtension(address(coreExtension));
+
+        address[] memory extensions = wLERC20e.getExtensions();
+
+        assertEq(extensions[0], address(coreExtension));
+
+        coreExtension.setLosslessCoreExtension(address(wLERC20e));
+
+        assertEq(wLERC20e.getBeforeTransfer(), address(coreExtension));
+        assertEq(wLERC20e.getLosslessCore(), address(coreExtension));
+
+        vm.stopPrank();
+    }
 }
