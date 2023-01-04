@@ -5,8 +5,8 @@ import "openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "openzeppelin/contracts/access/Ownable.sol";
 import "openzeppelin/contracts/access/AccessControl.sol";
 import "./LosslessWrappedERC20Extensible.sol";
-import "./LosslessWrappedERC20Protected.sol";
-import "./LosslessWrappedERC20ProtectedAdminless.sol";
+import "./LosslessWrappedERC20.sol";
+import "./LosslessWrappedERC20Adminless.sol";
 
 contract WrappedLosslessFactory {
     event RegisterExtensibleToken(IERC20, LosslessWrappedERC20Extensible);
@@ -144,7 +144,6 @@ contract WrappedLosslessFactory {
 
         // Call the `getRoleAdmin` function using the STATICCALL opcode
         // pragma ignore "Unused local variable."
-
         (bool success, bytes memory returnValue) = address(_token).staticcall(
             data
         );

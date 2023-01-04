@@ -14,10 +14,9 @@ import "lossless-v3/LosslessStaking.sol";
 import "wLERC20/Mocks/ERC20Mock.sol";
 import "wLERC20/Mocks/ERC20OwnableMock.sol";
 import "wLERC20/LosslessWrappedERC20Extensible.sol";
-import "wLERC20/LosslessWrappedERC20Protected.sol";
-import "wLERC20/LosslessWrappedERC20ProtectedAdminless.sol";
+import "wLERC20/LosslessWrappedERC20.sol";
+import "wLERC20/LosslessWrappedERC20Adminless.sol";
 import "wLERC20/LosslessWrappingFactory.sol";
-import "wLERC20/Extensions/LosslessERC20ApproveExtension.sol";
 import "wLERC20/Extensions/LosslessCoreExtension.sol";
 
 import "forge-std/Test.sol";
@@ -49,7 +48,6 @@ contract LosslessTestEnvironment is Test {
     LosslessWrappedERC20Protected public wLERC20p;
     LosslessWrappedERC20ProtectedAdminless public wLERC20ap;
     WrappedLosslessFactory public losslessFactory;
-    LosslessApproveTransferExtension public approveExtension;
     LosslessCoreExtension public coreExtension;
 
     address public dex = address(99);
@@ -124,9 +122,6 @@ contract LosslessTestEnvironment is Test {
 
         // Deploy Lossless Factory
         deployLosslessFactory();
-
-        // Deploy Extensions
-        deployExtensions();
     }
 
     /// ----- Helpers ------
@@ -355,12 +350,6 @@ contract LosslessTestEnvironment is Test {
     /// @notice Deploy Lossless Factory
     function deployLosslessFactory() public {
         losslessFactory = new WrappedLosslessFactory();
-    }
-
-    /// @notice Deploy extension
-    function deployExtensions() public {
-        vm.prank(tokenOwner);
-        approveExtension = new LosslessApproveTransferExtension();
     }
 
     /// @notice Generate a report
