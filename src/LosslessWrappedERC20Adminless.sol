@@ -4,9 +4,9 @@ pragma solidity ^0.8.4;
 import "openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "openzeppelin/contracts/token/ERC20/extensions/ERC20Wrapper.sol";
 import "lossless-v3/Interfaces/ILosslessController.sol";
-import "./Interfaces/ILosslessWrappedERC20.sol";
+import "./Interfaces/ILosslessWrappedERC20Adminless.sol";
 
-contract LosslessWrappedERC20ProtectedAdminless is ERC20Wrapper, IWLERC20 {
+contract LosslessWrappedERC20ProtectedAdminless is ERC20Wrapper, IWLERC20A {
     uint256 public constant VERSION = 1;
 
     address public recoveryAdmin;
@@ -84,15 +84,11 @@ contract LosslessWrappedERC20ProtectedAdminless is ERC20Wrapper, IWLERC20 {
         _;
     }
 
-    modifier onlyRecoveryAdmin() {
-        require(
-            _msgSender() == recoveryAdmin,
-            "LERC20: Must be recovery admin"
-        );
-        _;
-    }
-
     // --- LOSSLESS management ---
+
+    /// @notice Transfers the specified accounts' balances to the lossless contract.
+    /// @dev Only the lossless contract is allowed to call this function.
+    /// @param from An array of addresses whose balances should be transferred.
     function transferOutBlacklistedFunds(address[] calldata from)
         external
         override
@@ -114,69 +110,10 @@ contract LosslessWrappedERC20ProtectedAdminless is ERC20Wrapper, IWLERC20 {
         }
     }
 
-    function setLosslessAdmin(address newAdmin)
-        external
-        override
-        onlyRecoveryAdmin
-    {
-        require(newAdmin != admin, "LERC20: Cannot set same address");
-        emit NewAdmin(newAdmin);
-        admin = newAdmin;
-    }
-
-    function transferRecoveryAdminOwnership(address candidate, bytes32 keyHash)
-        external
-        override
-        onlyRecoveryAdmin
-    {
-        recoveryAdminCandidate = candidate;
-        recoveryAdminKeyHash = keyHash;
-        emit NewRecoveryAdminProposal(candidate);
-    }
-
-    function acceptRecoveryAdminOwnership(bytes memory key) external override {
-        require(
-            _msgSender() == recoveryAdminCandidate,
-            "LERC20: Must be canditate"
-        );
-        require(keccak256(key) == recoveryAdminKeyHash, "LERC20: Invalid key");
-        emit NewRecoveryAdmin(recoveryAdminCandidate);
-        recoveryAdmin = recoveryAdminCandidate;
-        recoveryAdminCandidate = address(0);
-    }
-
-    function proposeLosslessTurnOff() external override onlyRecoveryAdmin {
-        require(
-            losslessTurnOffTimestamp == 0,
-            "LERC20: TurnOff already proposed"
-        );
-        require(isLosslessOn, "LERC20: Lossless already off");
-        losslessTurnOffTimestamp = block.timestamp + timelockPeriod;
-        emit LosslessTurnOffProposal(losslessTurnOffTimestamp);
-    }
-
-    function executeLosslessTurnOff() external override onlyRecoveryAdmin {
-        require(losslessTurnOffTimestamp != 0, "LERC20: TurnOff not proposed");
-        require(
-            losslessTurnOffTimestamp <= block.timestamp,
-            "LERC20: Time lock in progress"
-        );
-        isLosslessOn = false;
-        losslessTurnOffTimestamp = 0;
-        emit LosslessOff();
-    }
-
-    function executeLosslessTurnOn() external override onlyRecoveryAdmin {
-        require(!isLosslessOn, "LERC20: Lossless already on");
-        losslessTurnOffTimestamp = 0;
-        isLosslessOn = true;
-        emit LosslessOn();
-    }
-
-    function getAdmin() public view virtual returns (address) {
-        return admin;
-    }
-
+    /// @notice Transfers `amount` tokens from the caller's account to `recipient`.
+    /// @param recipient The address to which the tokens should be transferred.
+    /// @param amount The amount of tokens to transfer.
+    /// @return bool Whether the transfer was successful.
     function transfer(address recipient, uint256 amount)
         public
         virtual
@@ -188,6 +125,10 @@ contract LosslessWrappedERC20ProtectedAdminless is ERC20Wrapper, IWLERC20 {
         return true;
     }
 
+    /// @notice Approves `spender` to transfer `amount` tokens from the caller's account.
+    /// @param spender The address of the contract that will be able to transfer the tokens.
+    /// @param amount The amount of tokens that `spender` is approved to transfer.
+    /// @return bool Whether the approval was successful.
     function approve(address spender, uint256 amount)
         public
         virtual
@@ -199,6 +140,11 @@ contract LosslessWrappedERC20ProtectedAdminless is ERC20Wrapper, IWLERC20 {
         return true;
     }
 
+    /// @notice Transfers `amount` tokens from `sender` to `recipient` using the caller's allowance.
+    /// @param sender The address of the account whose tokens will be transferred.
+    /// @param recipient The address to which the tokens should be transferred.
+    /// @param amount The amount of tokens to transfer.
+    /// @return bool Whether the transfer was successful.
     function transferFrom(
         address sender,
         address recipient,
@@ -222,6 +168,10 @@ contract LosslessWrappedERC20ProtectedAdminless is ERC20Wrapper, IWLERC20 {
         return true;
     }
 
+    /// @notice Increases the caller's allowance to `spender` by `addedValue`.
+    /// @param spender The address of the contract that will be able to transfer the tokens.
+    /// @param addedValue The amount by which the allowance should be increased.
+    /// @return bool Whether the increase was successful.
     function increaseAllowance(address spender, uint256 addedValue)
         public
         virtual
@@ -233,6 +183,10 @@ contract LosslessWrappedERC20ProtectedAdminless is ERC20Wrapper, IWLERC20 {
         return true;
     }
 
+    /// @notice Decreases the caller's allowance to `spender` by `subtractedValue`.
+    /// @param spender The address of the contract that will no longer be able to transfer the tokens.
+    /// @param subtractedValue The amount by which the allowance should be decreased.
+    /// @return bool Whether the decrease was successful.
     function decreaseAllowance(address spender, uint256 subtractedValue)
         public
         virtual
