@@ -268,4 +268,15 @@ contract LosslessCoreExtension is ILosslessCoreExtension {
             lossless.beforeTransfer(sender, recipient, amount);
         }
     }
+
+    function extensionAfterTransfer(address recipient, uint256 amount)
+        external
+        override
+    {}
+
+    function extensionAfterTransferFrom(
+        address sender,
+        address recipient,
+        uint256 amount
+    ) external override {}
 }

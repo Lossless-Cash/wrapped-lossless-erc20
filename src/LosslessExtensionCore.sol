@@ -23,7 +23,6 @@ abstract contract LosslessExtensionCore is
     EnumerableSet.AddressSet internal _extensions;
 
     address internal _losslessCoreExtension;
-    address internal _approveTransferBase;
     address internal _beforeTransferBase;
     address internal _afterTransferBase;
     address internal _beforeMintBase;
@@ -105,24 +104,7 @@ abstract contract LosslessExtensionCore is
         return _losslessCoreExtension;
     }
 
-    // APROVAL EXTENSION
-    /// @notice Set the Approve Transfer Extension
-    function setApproveTransferExtension() external override {
-        requireExtension();
-        _setApproveTransferBase(msg.sender);
-    }
-
-    function _setApproveTransferBase(address extension) internal {
-        _approveTransferBase = extension;
-        emit ApproveTransferUpdated(extension);
-    }
-
-    function getApproveTransfer() external view returns (address) {
-        return _approveTransferBase;
-    }
-
     // BEFORE TRANSFER EXTENSION
-
     /// @notice Set the Before Transfer Extension
     function setBeforeTransferExtension() external override {
         requireExtension();

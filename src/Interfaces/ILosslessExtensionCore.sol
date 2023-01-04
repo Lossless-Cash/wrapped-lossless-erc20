@@ -13,12 +13,6 @@ interface ICoreExtension is IERC165 {
         address indexed sender
     );
 
-    event ExtensionApproveTransferUpdated(
-        address indexed extension,
-        bool enabled
-    );
-
-    event ApproveTransferUpdated(address extension);
     event BeforeTransferUpdated(address extension);
     event AfterTransferUpdated(address extension);
     event BeforeMintUpdated(address extension);
@@ -33,8 +27,6 @@ interface ICoreExtension is IERC165 {
     function unregisterExtension(address extension) external;
 
     function setLosslessCoreExtension() external;
-
-    function setApproveTransferExtension() external;
 
     function setBeforeTransferExtension() external;
 
