@@ -21,10 +21,6 @@ abstract contract LosslessExtensionCore is
     using AddressUpgradeable for address;
 
     EnumerableSet.AddressSet internal _extensions;
-    EnumerableSet.AddressSet internal _blacklistedExtensions;
-
-    mapping(uint256 => address) internal _tokensExtension;
-    mapping(address => bool) internal _extensionApproveTransfers;
 
     address internal _losslessCoreExtension;
     address internal _approveTransferBase;
@@ -50,6 +46,8 @@ abstract contract LosslessExtensionCore is
             super.supportsInterface(interfaceId);
     }
 
+    /// @notice Require that the caller is a registered extension
+    /// @dev Reverts if the caller is not registered as an extension
     function requireExtension() internal view {
         require(
             _extensions.contains(msg.sender),
@@ -57,13 +55,8 @@ abstract contract LosslessExtensionCore is
         );
     }
 
-    function requireNonBlacklist(address extension) internal view {
-        require(
-            !_blacklistedExtensions.contains(extension),
-            "LSS: Extension blacklisted"
-        );
-    }
-
+    /// @notice Get the registered extensions
+    /// @return extensions Array of addresses of the registered extensions
     function getExtensions()
         external
         view
@@ -94,38 +87,8 @@ abstract contract LosslessExtensionCore is
         _extensions.remove(extension);
     }
 
-    function _blacklistExtension(address extension) internal {
-        require(
-            extension != address(0) && extension != address(this),
-            "LSS: Cannot blacklist yourself"
-        );
-        if (_extensions.contains(extension)) {
-            emit ExtensionUnregistered(extension, msg.sender);
-            _extensions.remove(extension);
-        }
-        if (!_blacklistedExtensions.contains(extension)) {
-            emit ExtensionBlacklisted(extension, msg.sender);
-            _blacklistedExtensions.add(extension);
-        }
-    }
-
-    function _tokenExtension(uint256 tokenId)
-        internal
-        view
-        returns (address extension)
-    {
-        extension = _tokensExtension[tokenId];
-
-        require(extension != address(0), "LSS: No extension for token");
-        require(
-            !_blacklistedExtensions.contains(extension),
-            "LSS: Extension blacklisted"
-        );
-
-        return extension;
-    }
-
     // LOSSLESS CORE EXTENSION
+    /// @notice Set the Lossless Core Extension
     function setLosslessCoreExtension() external {
         requireExtension();
         _setLosslessCoreExtension(msg.sender);
@@ -136,11 +99,14 @@ abstract contract LosslessExtensionCore is
         //emit ApproveTransferUpdated(extension);
     }
 
+    /// @notice Get the Lossless Core Extension
+    /// @return address of the extension contract
     function getLosslessCore() external view returns (address) {
         return _losslessCoreExtension;
     }
 
     // APROVAL EXTENSION
+    /// @notice Set the Approve Transfer Extension
     function setApproveTransferExtension() external override {
         requireExtension();
         _setApproveTransferBase(msg.sender);
@@ -157,6 +123,7 @@ abstract contract LosslessExtensionCore is
 
     // BEFORE TRANSFER EXTENSION
 
+    /// @notice Set the Before Transfer Extension
     function setBeforeTransferExtension() external override {
         requireExtension();
         _setBeforeTransferBase(msg.sender);
@@ -172,7 +139,7 @@ abstract contract LosslessExtensionCore is
     }
 
     // AFTER TRANSFER EXTENSION
-
+    /// @notice Set the After Transfer Extension
     function setAfterTransferExtension() external override {
         requireExtension();
         _setAfterTransferBase(msg.sender);
@@ -188,12 +155,13 @@ abstract contract LosslessExtensionCore is
     }
 
     // BEFORE MINT EXTENSION
-
+    /// @notice Set the Before Mint Extension
     function setBeforeMintExtension() external override {
         requireExtension();
         _setBeforeMintBase(msg.sender);
     }
 
+    /// @notice Set the After Mint Extension
     function _setBeforeMintBase(address extension) internal {
         _beforeMintBase = extension;
         emit BeforeMintUpdated(extension);
@@ -205,6 +173,7 @@ abstract contract LosslessExtensionCore is
 
     // AFTER MINT EXTENSION
 
+    /// @notice Set the After Mint Extension
     function setAfterMintExtension() external override {
         requireExtension();
         _setAfterMintBase(msg.sender);
@@ -221,6 +190,7 @@ abstract contract LosslessExtensionCore is
 
     // BEFORE BURN EXTENSION
 
+    /// @notice Set the Before Burn Extension
     function setBeforeBurnExtension() external override {
         requireExtension();
         _setBeforeBurnBase(msg.sender);
@@ -237,6 +207,7 @@ abstract contract LosslessExtensionCore is
 
     // AFTER BURN EXTENSION
 
+    // @notice Set the After Burn Extension
     function setAfterBurnExtension() external override {
         requireExtension();
         _setAfterBurnBase(msg.sender);

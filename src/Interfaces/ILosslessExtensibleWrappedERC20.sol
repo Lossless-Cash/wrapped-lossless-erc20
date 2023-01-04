@@ -13,6 +13,4 @@ interface ILosslessExtensibleWrappedERC20 is ICoreExtension {
     function registerExtension(address extension) external override;
 
     function unregisterExtension(address extension) external override;
-
-    function blacklistExtension(address extension) external override;
 }

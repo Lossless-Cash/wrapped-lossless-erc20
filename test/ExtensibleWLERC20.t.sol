@@ -53,18 +53,4 @@ contract WrappedERC20Test is LosslessTestEnvironment {
 
         assertEq(extensions.length, 0);
     }
-
-    function testExtensibleBlacklistApproveExtension()
-        public
-        withExtensibleWrappedToken
-    {
-        wLERC20e.blacklistExtension(address(approveExtension));
-
-        vm.expectRevert(bytes("LSS: Extension blacklisted"));
-        wLERC20e.registerExtension(address(approveExtension));
-
-        address[] memory extensions = wLERC20e.getExtensions();
-
-        assertEq(extensions.length, 0);
-    }
 }

@@ -12,10 +12,6 @@ interface ICoreExtension is IERC165 {
         address indexed extension,
         address indexed sender
     );
-    event ExtensionBlacklisted(
-        address indexed extension,
-        address indexed sender
-    );
 
     event ExtensionApproveTransferUpdated(
         address indexed extension,
@@ -35,8 +31,6 @@ interface ICoreExtension is IERC165 {
     function registerExtension(address extension) external;
 
     function unregisterExtension(address extension) external;
-
-    function blacklistExtension(address extension) external;
 
     function setLosslessCoreExtension() external;
 

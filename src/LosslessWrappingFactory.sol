@@ -144,7 +144,6 @@ contract WrappedLosslessFactory {
 
         // Call the `getRoleAdmin` function using the STATICCALL opcode
         // pragma ignore "Unused local variable."
-
         (bool success, bytes memory returnValue) = address(_token).staticcall(
             data
         );
