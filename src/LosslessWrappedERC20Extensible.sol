@@ -4,7 +4,6 @@ pragma solidity ^0.8.4;
 import "openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "openzeppelin/contracts/token/ERC20/extensions/ERC20Wrapper.sol";
 import "./Interfaces/ILosslessExtensibleWrappedERC20.sol";
-import "./Interfaces/ILosslessERC20ApproveExtension.sol";
 import "./Interfaces/ILosslessTransfersExtension.sol";
 import "./Interfaces/ILosslessCoreExtension.sol";
 import "./LosslessExtensionCore.sol";
@@ -96,10 +95,6 @@ contract LosslessWrappedERC20Extensible is
         address to,
         uint256 amount
     ) internal override(ERC20) {
-        if (_approveTransferBase != address(0)) {
-            IERC20ApproveExtension(_approveTransferBase)
-                .extensionApproveTransfer(msg.sender, from, to);
-        }
         if (_beforeTransferBase != address(0)) {
             ILosslessTransferExtension(_beforeTransferBase)
                 .extensionBeforeTransfer(from, amount);
