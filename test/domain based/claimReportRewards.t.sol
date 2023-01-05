@@ -6,7 +6,7 @@ import "../utils/losslessEnv.t.sol";
 contract ReporterRewardsClaim is LosslessTestEnvironment {
     function testReporterClaimBalanceIncrease()
         public
-        lssCoreExtended
+        withExtensibleCoreProtected
         withProtectedWrappedToken
         withAdminlessProtectedWrappedToken
         withReportsGenerated
@@ -17,7 +17,7 @@ contract ReporterRewardsClaim is LosslessTestEnvironment {
 
         vm.warp(block.timestamp + settlementPeriod + 1);
 
-        uint256 beforeBalanceAdminless = wLERC20ap.balanceOf(address(reporter));
+        uint256 beforeBalanceAdminless = wLERC20a.balanceOf(address(reporter));
         uint256 beforeBalanceExtensible = wLERC20e.balanceOf(address(reporter));
         uint256 beforeBalanceProtected = wLERC20p.balanceOf(address(reporter));
 
@@ -27,7 +27,7 @@ contract ReporterRewardsClaim is LosslessTestEnvironment {
         lssReporting.reporterClaim(3);
         vm.stopPrank();
 
-        uint256 afterBalanceAdminless = wLERC20ap.balanceOf(address(reporter));
+        uint256 afterBalanceAdminless = wLERC20a.balanceOf(address(reporter));
         uint256 afterBalanceExtensible = wLERC20e.balanceOf(address(reporter));
         uint256 afterBalanceProtected = wLERC20p.balanceOf(address(reporter));
 
@@ -38,7 +38,7 @@ contract ReporterRewardsClaim is LosslessTestEnvironment {
 
     function testReporterClaimWhenReportSolvedPositively()
         public
-        lssCoreExtended
+        withExtensibleCoreProtected
         withProtectedWrappedToken
         withAdminlessProtectedWrappedToken
         withReportsGenerated
@@ -58,7 +58,7 @@ contract ReporterRewardsClaim is LosslessTestEnvironment {
 
     function testReporterClaimWhenReportSolvedNegatively()
         public
-        lssCoreExtended
+        withExtensibleCoreProtected
         withProtectedWrappedToken
         withAdminlessProtectedWrappedToken
         withReportsGenerated
@@ -81,7 +81,7 @@ contract ReporterRewardsClaim is LosslessTestEnvironment {
 
     function testReporterClaimWhenClaimingTwice()
         public
-        lssCoreExtended
+        withExtensibleCoreProtected
         withProtectedWrappedToken
         withAdminlessProtectedWrappedToken
         withReportsGenerated
@@ -108,7 +108,7 @@ contract ReporterRewardsClaim is LosslessTestEnvironment {
 
     function testReporterClaimWhenNonReporterTriesToClaim()
         public
-        lssCoreExtended
+        withExtensibleCoreProtected
         withProtectedWrappedToken
         withAdminlessProtectedWrappedToken
         withReportsGenerated

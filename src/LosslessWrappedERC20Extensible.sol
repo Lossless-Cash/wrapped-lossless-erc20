@@ -14,6 +14,7 @@ contract LosslessWrappedERC20Extensible is
     LosslessExtensionCore
 {
     uint256 public constant VERSION = 1;
+    address public admin;
 
     constructor(
         IERC20 _underlyingToken,
@@ -80,6 +81,11 @@ contract LosslessWrappedERC20Extensible is
         } else {
             revert("LSS: Lossless Core Extension not registered");
         }
+    }
+
+    function setAdmin(address _admin) public {
+        require(msg.sender != _losslessCoreExtension, "Only Core Extension");
+        admin = _admin;
     }
 
     function _afterTokenTransfer(

@@ -46,6 +46,7 @@ contract LosslessCoreExtension is ILosslessCoreExtension {
         address protectedToken_
     ) {
         protectedToken = protectedToken_;
+        ILosslessExtensibleWrappedERC20(protectedToken).setAdmin(admin_);
         admin = admin_;
         recoveryAdmin = recoveryAdmin_;
         recoveryAdminCandidate = address(0);

@@ -19,14 +19,14 @@ contract WrappedERC20Test is LosslessTestEnvironment {
         uint256[5] memory memberBalances;
 
         for (uint256 i = 0; i < committeeMembers.length; i++) {
-            memberBalances[i] = wLERC20ap.balanceOf(committeeMembers[i]);
+            memberBalances[i] = wLERC20a.balanceOf(committeeMembers[i]);
         }
 
         uint256 reportId = generateReport(
-            address(wLERC20ap),
+            address(wLERC20a),
             maliciousActor,
             reporter,
-            wLERC20ap
+            wLERC20a
         );
 
         solveReportPositively(reportId);
@@ -37,7 +37,7 @@ contract WrappedERC20Test is LosslessTestEnvironment {
             uint256 newBalance = memberBalances[i] +
                 ((reportedAmount * committeeReward) / 1e2) /
                 committeeMembers.length;
-            assertEq(wLERC20ap.balanceOf(committeeMembers[i]), newBalance + 4);
+            assertEq(wLERC20a.balanceOf(committeeMembers[i]), newBalance + 4);
         }
     }
 
@@ -53,14 +53,14 @@ contract WrappedERC20Test is LosslessTestEnvironment {
         uint256 participatingMembers = 3;
 
         for (uint256 i = 0; i < totalMembers; i++) {
-            memberBalances[i] = wLERC20ap.balanceOf(committeeMembers[i]);
+            memberBalances[i] = wLERC20a.balanceOf(committeeMembers[i]);
         }
 
         uint256 reportId = generateReport(
-            address(wLERC20ap),
+            address(wLERC20a),
             maliciousActor,
             reporter,
-            wLERC20ap
+            wLERC20a
         );
         solveReport(reportId, participatingMembers, true, true, true);
 
@@ -72,7 +72,7 @@ contract WrappedERC20Test is LosslessTestEnvironment {
                     ((reportedAmount * committeeReward) / 1e2) /
                     participatingMembers;
                 assertEq(
-                    wLERC20ap.balanceOf(committeeMembers[i]),
+                    wLERC20a.balanceOf(committeeMembers[i]),
                     newBalance + 7
                 );
             } else {
@@ -99,10 +99,10 @@ contract WrappedERC20Test is LosslessTestEnvironment {
                     losslessReward)) / 1e2);
 
         uint256 reportId = generateReport(
-            address(wLERC20ap),
+            address(wLERC20a),
             maliciousActor,
             reporter,
-            wLERC20ap
+            wLERC20a
         );
         stakeOnReport(reportId, participatingStakers, 30 minutes);
 
@@ -126,10 +126,10 @@ contract WrappedERC20Test is LosslessTestEnvironment {
                 (reporterReward + committeeReward + losslessReward)) / 1e2);
 
         uint256 reportId = generateReport(
-            address(wLERC20ap),
+            address(wLERC20a),
             maliciousActor,
             reporter,
-            wLERC20ap
+            wLERC20a
         );
 
         solveReport(reportId, participatingMembers, true, true, true);
@@ -151,10 +151,10 @@ contract WrappedERC20Test is LosslessTestEnvironment {
             ((reportedAmount * (reporterReward + losslessReward)) / 1e2);
 
         uint256 reportId = generateReport(
-            address(wLERC20ap),
+            address(wLERC20a),
             maliciousActor,
             reporter,
-            wLERC20ap
+            wLERC20a
         );
 
         solveReport(reportId, participatingMembers, true, true, true);
