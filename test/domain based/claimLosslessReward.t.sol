@@ -6,7 +6,7 @@ import "../utils/losslessEnv.t.sol";
 contract LosslessRewardsClaim is LosslessTestEnvironment {
     function testLosslessClaimWhenReportNotSolved()
         public
-        lssCoreExtended
+        withExtensibleCoreProtected
         withProtectedWrappedToken
         withAdminlessProtectedWrappedToken
         withReportsGenerated
@@ -21,7 +21,7 @@ contract LosslessRewardsClaim is LosslessTestEnvironment {
 
     function testLosslessClaimWhenReportSolvedNegatively()
         public
-        lssCoreExtended
+        withExtensibleCoreProtected
         withProtectedWrappedToken
         withAdminlessProtectedWrappedToken
         withReportsGenerated
@@ -39,7 +39,7 @@ contract LosslessRewardsClaim is LosslessTestEnvironment {
 
     function testLosslessClaimWhenReportSolvedPositively()
         public
-        lssCoreExtended
+        withExtensibleCoreProtected
         withProtectedWrappedToken
         withAdminlessProtectedWrappedToken
         withReportsGenerated
@@ -54,12 +54,12 @@ contract LosslessRewardsClaim is LosslessTestEnvironment {
 
     function testLosslessClaimBalanceIncrease()
         public
-        lssCoreExtended
+        withExtensibleCoreProtected
         withProtectedWrappedToken
         withAdminlessProtectedWrappedToken
         withReportsGenerated
     {
-        uint256 adminlessProtectedBalance = wLERC20ap.balanceOf(address(this));
+        uint256 adminlessProtectedBalance = wLERC20a.balanceOf(address(this));
         uint256 protectedBalance = wLERC20p.balanceOf(address(this));
         uint256 extensiblerotectedBalance = wLERC20e.balanceOf(address(this));
 
@@ -70,7 +70,7 @@ contract LosslessRewardsClaim is LosslessTestEnvironment {
         solveReportPositively(3);
         lssGovernance.losslessClaim(3);
 
-        uint256 afterAdminlessProtectedBalance = wLERC20ap.balanceOf(
+        uint256 afterAdminlessProtectedBalance = wLERC20a.balanceOf(
             address(this)
         );
         uint256 afterProtectedBalance = wLERC20p.balanceOf(address(this));
@@ -85,7 +85,7 @@ contract LosslessRewardsClaim is LosslessTestEnvironment {
 
     function testLosslessClaimSecondTimeRevert()
         public
-        lssCoreExtended
+        withExtensibleCoreProtected
         withProtectedWrappedToken
         withAdminlessProtectedWrappedToken
         withReportsGenerated
@@ -107,7 +107,7 @@ contract LosslessRewardsClaim is LosslessTestEnvironment {
 
     function testLosslessClaimNonLosslessAdmin()
         public
-        lssCoreExtended
+        withExtensibleCoreProtected
         withProtectedWrappedToken
         withAdminlessProtectedWrappedToken
         withReportsGenerated

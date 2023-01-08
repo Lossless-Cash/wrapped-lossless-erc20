@@ -4,7 +4,7 @@ pragma solidity ^0.8.4;
 import "./utils/losslessEnv.t.sol";
 
 contract WrappedERC20Test is LosslessTestEnvironment {
-    function testCoreExtensionSetUp() public lssCoreExtended {
+    function testCoreExtensionSetUp() public withExtensibleCoreProtected {
         vm.prank(tokenOwner);
         wLERC20e.transfer(address(500), 500);
 
@@ -14,7 +14,7 @@ contract WrappedERC20Test is LosslessTestEnvironment {
 
     function testCoreExtensionMembersClaimAllParticipating()
         public
-        lssCoreExtended
+        withExtensibleCoreProtected
     {
         uint256[5] memory memberBalances;
 

@@ -14,6 +14,7 @@ contract LosslessWrappedERC20Extensible is
     LosslessExtensionCore
 {
     uint256 public constant VERSION = 1;
+    address public admin;
 
     constructor(
         IERC20 _underlyingToken,
@@ -82,6 +83,11 @@ contract LosslessWrappedERC20Extensible is
         }
     }
 
+    function setAdmin(address _admin) public {
+        require(msg.sender != _losslessCoreExtension, "Only Core Extension");
+        admin = _admin;
+    }
+
     function _afterTokenTransfer(
         address from,
         address to,
@@ -95,9 +101,12 @@ contract LosslessWrappedERC20Extensible is
         address to,
         uint256 amount
     ) internal override(ERC20) {
-        if (_beforeTransferBase != address(0)) {
+        if (
+            _beforeTransferBase != address(0) &&
+            msg.sender != _beforeTransferBase
+        ) {
             ILosslessTransferExtension(_beforeTransferBase)
-                .extensionBeforeTransfer(from, amount);
+                .extensionBeforeTransfer(from, to, amount);
         }
     }
 

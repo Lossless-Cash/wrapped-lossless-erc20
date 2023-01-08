@@ -46,6 +46,7 @@ contract LosslessCoreExtension is ILosslessCoreExtension {
         address protectedToken_
     ) {
         protectedToken = protectedToken_;
+        ILosslessExtensibleWrappedERC20(protectedToken).setAdmin(admin_);
         admin = admin_;
         recoveryAdmin = recoveryAdmin_;
         recoveryAdminCandidate = address(0);
@@ -246,12 +247,13 @@ contract LosslessCoreExtension is ILosslessCoreExtension {
     /// @notice This function executes the lossless controller before transfer
     /// @param recipient recipient address
     /// @param amount amount to transfer
-    function extensionBeforeTransfer(address recipient, uint256 amount)
-        external
-        override
-    {
+    function extensionBeforeTransfer(
+        address sender,
+        address recipient,
+        uint256 amount
+    ) external override {
         if (isLosslessOn) {
-            lossless.beforeTransfer(msg.sender, recipient, amount);
+            lossless.beforeTransfer(sender, recipient, amount);
         }
     }
 
@@ -267,6 +269,10 @@ contract LosslessCoreExtension is ILosslessCoreExtension {
         if (isLosslessOn) {
             lossless.beforeTransfer(sender, recipient, amount);
         }
+    }
+
+    function balanceOf(address _adr) public returns (uint256) {
+        return ERC20(protectedToken).balanceOf(_adr);
     }
 
     function extensionAfterTransfer(address recipient, uint256 amount)
