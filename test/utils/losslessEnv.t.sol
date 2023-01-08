@@ -50,9 +50,9 @@ contract LosslessTestEnvironment is Test {
     WrappedLosslessFactory public losslessFactory;
     LosslessCoreExtension public coreExtension;
 
-    address public dex = address(99);
+    address public dex = address(1099);
 
-    address[] public whitelist = [address(this), dex];
+    address[] public whitelist = [address(this)];
     address[] public dexList = [dex];
     address[] public committeeMembers = [
         address(100),
@@ -77,8 +77,8 @@ contract LosslessTestEnvironment is Test {
 
     uint256 public totalSupply = 100000000000000000000;
     uint256 public mintAndBurnLimit = 99999999;
-    uint256 public settlementPeriod = 1 minutes;
-    uint256 public extraordinaryPeriod = 1 minutes;
+    uint256 public settlementPeriod = 10 minutes;
+    uint256 public extraordinaryPeriod = 10 minutes;
 
     uint256 public mintPeriod = 10 minutes;
     uint256 public burnPeriod = 10 minutes;
@@ -97,7 +97,7 @@ contract LosslessTestEnvironment is Test {
 
     uint256 public walletDispute = 7 days;
 
-    uint256 public dexTransferTreshold = 200;
+    uint256 public dexTransferTreshold = 5;
     uint256 public settlementTimelock = 10 minutes;
 
     uint256 public reportedAmount = 100000;
@@ -141,6 +141,7 @@ contract LosslessTestEnvironment is Test {
         );
 
         wLERC20e.transfer(address(maliciousActor), 1000);
+
         vm.stopPrank();
 
         _;
@@ -167,10 +168,20 @@ contract LosslessTestEnvironment is Test {
 
         wLERC20p.transfer(address(maliciousActor), 1000);
 
+        lssController.proposeNewSettlementPeriod(
+            ILERC20(address(wLERC20p)),
+            10 minutes
+        );
+
+        vm.warp(block.timestamp + 1 hours);
+
+        lssController.executeNewSettlementPeriod(ILERC20(address(wLERC20p)));
+
         vm.stopPrank();
 
         _;
     }
+
     modifier withAdminlessProtectedWrappedToken() {
         vm.startPrank(tokenOwner);
         wLERC20a = losslessFactory.registerAdminlessProtectedToken(
@@ -352,9 +363,6 @@ contract LosslessTestEnvironment is Test {
 
     /// @notice Sets up Lossless Controller
     function configureControllerVars() public {
-        //lssController.proposeNewSettlementPeriod(lssToken, settlementPeriod);
-        //lssController.executeNewSettlementPeriod(lssToken);
-
         lssController.setStakingContractAddress(lssStaking);
         lssController.setReportingContractAddress(lssReporting);
         lssController.setGovernanceContractAddress(lssGovernance);
@@ -536,6 +544,17 @@ contract LosslessTestEnvironment is Test {
         assertEq(extensions[0], address(coreExtension));
 
         coreExtension.setLosslessCoreExtension(address(wLERC20e));
+
+        lssController.proposeNewSettlementPeriod(
+            ILERC20(address(coreExtension)),
+            10 minutes
+        );
+
+        vm.warp(block.timestamp + 1 hours);
+
+        lssController.executeNewSettlementPeriod(
+            ILERC20(address(coreExtension))
+        );
 
         assertEq(wLERC20e.getBeforeTransfer(), address(coreExtension));
         assertEq(wLERC20e.getLosslessCore(), address(coreExtension));

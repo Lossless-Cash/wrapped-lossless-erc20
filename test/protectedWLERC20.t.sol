@@ -72,6 +72,8 @@ contract WrappedERC20Test is LosslessTestEnvironment {
 
         solveReportPositively(reportId);
 
+        vm.warp(block.timestamp + settlementPeriod + 1 minutes);
+
         for (uint256 i = 0; i < committeeMembers.length; i++) {
             vm.prank(committeeMembers[i]);
             lssGovernance.claimCommitteeReward(reportId);
@@ -104,6 +106,8 @@ contract WrappedERC20Test is LosslessTestEnvironment {
             wLERC20p
         );
         solveReport(reportId, participatingMembers, true, true, true);
+
+        vm.warp(block.timestamp + settlementPeriod + 1 minutes);
 
         for (uint256 i = 0; i < totalMembers; i++) {
             vm.startPrank(committeeMembers[i]);

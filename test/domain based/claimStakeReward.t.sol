@@ -29,6 +29,8 @@ contract StakeRewardsClaim is LosslessTestEnvironment {
         solveReportPositively(2);
         solveReportPositively(3);
 
+        vm.warp(block.timestamp + settlementPeriod + 1 minutes);
+
         claimStakeOnReport(1);
         claimStakeOnReport(2);
         claimStakeOnReport(3);
@@ -111,6 +113,8 @@ contract StakeRewardsClaim is LosslessTestEnvironment {
         solveReportPositively(1);
         solveReportPositively(2);
         solveReportPositively(3);
+
+        vm.warp(block.timestamp + settlementPeriod + 1 minutes);
 
         claimStakeOnReport(1);
         claimStakeOnReport(2);

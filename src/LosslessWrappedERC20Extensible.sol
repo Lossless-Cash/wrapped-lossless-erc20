@@ -101,9 +101,12 @@ contract LosslessWrappedERC20Extensible is
         address to,
         uint256 amount
     ) internal override(ERC20) {
-        if (_beforeTransferBase != address(0)) {
+        if (
+            _beforeTransferBase != address(0) &&
+            msg.sender != _beforeTransferBase
+        ) {
             ILosslessTransferExtension(_beforeTransferBase)
-                .extensionBeforeTransfer(from, amount);
+                .extensionBeforeTransfer(from, to, amount);
         }
     }
 
