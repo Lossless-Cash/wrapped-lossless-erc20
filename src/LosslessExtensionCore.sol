@@ -21,13 +21,13 @@ abstract contract LosslessExtensionCore is
 
     EnumerableSet.AddressSet internal _extensions;
 
-    address internal _losslessCoreExtension;
-    address internal _beforeTransferBase;
-    address internal _afterTransferBase;
-    address internal _beforeMintBase;
-    address internal _afterMintBase;
-    address internal _beforeBurnBase;
-    address internal _afterBurnBase;
+    address public _losslessCoreExtension;
+    address public _beforeTransferBase;
+    address public _afterTransferBase;
+    address public _beforeMintBase;
+    address public _afterMintBase;
+    address public _beforeBurnBase;
+    address public _afterBurnBase;
 
     bytes4 private constant _CREATOR_CORE_V1 = 0x28f10a21;
 
@@ -97,12 +97,6 @@ abstract contract LosslessExtensionCore is
         emit SetLosslessCoreExtension(extension);
     }
 
-    /// @notice Get the Lossless Core Extension
-    /// @return address of the extension contract
-    function getLosslessCore() external view returns (address) {
-        return _losslessCoreExtension;
-    }
-
     // BEFORE TRANSFER EXTENSION
     /// @notice Set the Before Transfer Extension
     function setBeforeTransferExtension() external override requireExtension {
@@ -114,10 +108,6 @@ abstract contract LosslessExtensionCore is
         emit BeforeTransferUpdated(extension);
     }
 
-    function getBeforeTransfer() external view returns (address) {
-        return _beforeTransferBase;
-    }
-
     // AFTER TRANSFER EXTENSION
     /// @notice Set the After Transfer Extension
     function setAfterTransferExtension() external override requireExtension {
@@ -127,10 +117,6 @@ abstract contract LosslessExtensionCore is
     function _setAfterTransferBase(address extension) internal {
         _afterTransferBase = extension;
         emit AfterTransferUpdated(extension);
-    }
-
-    function getAfterTransfer() external view returns (address) {
-        return _afterTransferBase;
     }
 
     // BEFORE MINT EXTENSION
@@ -145,10 +131,6 @@ abstract contract LosslessExtensionCore is
         emit BeforeMintUpdated(extension);
     }
 
-    function getBeforeMint() external view returns (address) {
-        return _beforeMintBase;
-    }
-
     // AFTER MINT EXTENSION
 
     /// @notice Set the After Mint Extension
@@ -159,10 +141,6 @@ abstract contract LosslessExtensionCore is
     function _setAfterMintBase(address extension) internal {
         _afterMintBase = extension;
         emit AfterMintUpdated(extension);
-    }
-
-    function getAfterMint() external view returns (address) {
-        return _afterMintBase;
     }
 
     // BEFORE BURN EXTENSION
@@ -177,10 +155,6 @@ abstract contract LosslessExtensionCore is
         emit BeforeBurnUpdated(extension);
     }
 
-    function getBeforeBurn() external view returns (address) {
-        return _beforeBurnBase;
-    }
-
     // AFTER BURN EXTENSION
 
     // @notice Set the After Burn Extension
@@ -191,9 +165,5 @@ abstract contract LosslessExtensionCore is
     function _setAfterBurnBase(address extension) internal {
         _afterBurnBase = extension;
         emit AfterBurnUpdated(extension);
-    }
-
-    function getAfterBurn() external view returns (address) {
-        return _afterBurnBase;
     }
 }
