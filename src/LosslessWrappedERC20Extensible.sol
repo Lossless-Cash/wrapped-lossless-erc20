@@ -40,7 +40,7 @@ contract LosslessWrappedERC20Extensible is
     /// @notice Registers the given extension.
     /// @dev Only extensions that are not blacklisted can be registered.
     /// @param extension The extension to be registered.
-    function registerExtension(address extension)
+    function registerExtension(address extension)               // Shouldn't there be some sort of access control who can register and extension?
         external
         override(ICoreExtension, ILosslessExtensibleWrappedERC20)
     {

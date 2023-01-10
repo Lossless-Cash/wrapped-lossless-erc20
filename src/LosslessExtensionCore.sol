@@ -16,9 +16,9 @@ abstract contract LosslessExtensionCore is
     ICoreExtension,
     ERC165
 {
-    using Strings for uint256;
+    using Strings for uint256;  // Not used?
     using EnumerableSet for EnumerableSet.AddressSet;
-    using AddressUpgradeable for address;
+    using AddressUpgradeable for address;  // Not used?
 
     EnumerableSet.AddressSet internal _extensions;
 
@@ -47,7 +47,7 @@ abstract contract LosslessExtensionCore is
 
     /// @notice Require that the caller is a registered extension
     /// @dev Reverts if the caller is not registered as an extension
-    function requireExtension() internal view {
+    function requireExtension() internal view {         // Is there a reason why not to use modifier?
         require(
             _extensions.contains(msg.sender),
             "LSS: Must be registered extension"
@@ -95,7 +95,7 @@ abstract contract LosslessExtensionCore is
 
     function _setLosslessCoreExtension(address extension) internal {
         _losslessCoreExtension = extension;
-        //emit ApproveTransferUpdated(extension);
+        //emit ApproveTransferUpdated(extension);               // Should we have some sort of event emmited here?
     }
 
     /// @notice Get the Lossless Core Extension
@@ -106,8 +106,8 @@ abstract contract LosslessExtensionCore is
 
     // BEFORE TRANSFER EXTENSION
     /// @notice Set the Before Transfer Extension
-    function setBeforeTransferExtension() external override {
-        requireExtension();
+    function setBeforeTransferExtension() external override {      // Do we really need this pattern of external function calling internal one for every setSomething?
+        requireExtension();                                         // Maybe one function would be good enough?
         _setBeforeTransferBase(msg.sender);
     }
 
@@ -116,7 +116,7 @@ abstract contract LosslessExtensionCore is
         emit BeforeTransferUpdated(extension);
     }
 
-    function getBeforeTransfer() external view returns (address) {
+    function getBeforeTransfer() external view returns (address) {  // Do we really need getters for all the variables, maybe just make them public ?
         return _beforeTransferBase;
     }
 
