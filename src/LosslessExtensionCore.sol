@@ -94,7 +94,7 @@ abstract contract LosslessExtensionCore is
 
     function _setLosslessCoreExtension(address extension) internal {
         _losslessCoreExtension = extension;
-        //emit ApproveTransferUpdated(extension);
+        emit SetLosslessCoreExtension(extension);
     }
 
     /// @notice Get the Lossless Core Extension
