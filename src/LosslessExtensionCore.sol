@@ -16,7 +16,6 @@ abstract contract LosslessExtensionCore is
     ICoreExtension,
     ERC165
 {
-    using Strings for uint256;
     using EnumerableSet for EnumerableSet.AddressSet;
     using AddressUpgradeable for address;
 
@@ -47,11 +46,12 @@ abstract contract LosslessExtensionCore is
 
     /// @notice Require that the caller is a registered extension
     /// @dev Reverts if the caller is not registered as an extension
-    function requireExtension() internal view {
+    modifier requireExtension() {
         require(
             _extensions.contains(msg.sender),
             "LSS: Must be registered extension"
         );
+        _;
     }
 
     /// @notice Get the registered extensions
@@ -88,8 +88,7 @@ abstract contract LosslessExtensionCore is
 
     // LOSSLESS CORE EXTENSION
     /// @notice Set the Lossless Core Extension
-    function setLosslessCoreExtension() external {
-        requireExtension();
+    function setLosslessCoreExtension() external requireExtension {
         _setLosslessCoreExtension(msg.sender);
     }
 
@@ -106,8 +105,7 @@ abstract contract LosslessExtensionCore is
 
     // BEFORE TRANSFER EXTENSION
     /// @notice Set the Before Transfer Extension
-    function setBeforeTransferExtension() external override {
-        requireExtension();
+    function setBeforeTransferExtension() external override requireExtension {
         _setBeforeTransferBase(msg.sender);
     }
 
@@ -122,8 +120,7 @@ abstract contract LosslessExtensionCore is
 
     // AFTER TRANSFER EXTENSION
     /// @notice Set the After Transfer Extension
-    function setAfterTransferExtension() external override {
-        requireExtension();
+    function setAfterTransferExtension() external override requireExtension {
         _setAfterTransferBase(msg.sender);
     }
 
@@ -139,7 +136,6 @@ abstract contract LosslessExtensionCore is
     // BEFORE MINT EXTENSION
     /// @notice Set the Before Mint Extension
     function setBeforeMintExtension() external override {
-        requireExtension();
         _setBeforeMintBase(msg.sender);
     }
 
@@ -156,8 +152,7 @@ abstract contract LosslessExtensionCore is
     // AFTER MINT EXTENSION
 
     /// @notice Set the After Mint Extension
-    function setAfterMintExtension() external override {
-        requireExtension();
+    function setAfterMintExtension() external override requireExtension {
         _setAfterMintBase(msg.sender);
     }
 
@@ -173,8 +168,7 @@ abstract contract LosslessExtensionCore is
     // BEFORE BURN EXTENSION
 
     /// @notice Set the Before Burn Extension
-    function setBeforeBurnExtension() external override {
-        requireExtension();
+    function setBeforeBurnExtension() external override requireExtension {
         _setBeforeBurnBase(msg.sender);
     }
 
@@ -190,8 +184,7 @@ abstract contract LosslessExtensionCore is
     // AFTER BURN EXTENSION
 
     // @notice Set the After Burn Extension
-    function setAfterBurnExtension() external override {
-        requireExtension();
+    function setAfterBurnExtension() external override requireExtension {
         _setAfterBurnBase(msg.sender);
     }
 
