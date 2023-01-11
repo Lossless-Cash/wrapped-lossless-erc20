@@ -180,7 +180,11 @@ contract LosslessWrappedERC20ProtectedAdminless is ERC20Wrapper, IWLERC20A {
         lssIncreaseAllowance(spender, addedValue)
         returns (bool)
     {
-        _approve(_msgSender(), spender, allowance(_msgSender(), spender));
+        _approve(
+            _msgSender(),
+            spender,
+            allowance(_msgSender(), spender) + addedValue
+        );
         return true;
     }
 

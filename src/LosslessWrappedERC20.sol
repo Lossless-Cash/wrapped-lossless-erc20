@@ -277,7 +277,11 @@ contract LosslessWrappedERC20Protected is ERC20Wrapper, IWLERC20 {
         lssIncreaseAllowance(spender, addedValue)
         returns (bool)
     {
-        _approve(_msgSender(), spender, allowance(_msgSender(), spender));
+        _approve(
+            _msgSender(),
+            spender,
+            allowance(_msgSender(), spender) + addedValue
+        );
         return true;
     }
 
