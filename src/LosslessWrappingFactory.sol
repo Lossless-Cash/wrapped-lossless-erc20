@@ -38,7 +38,8 @@ contract WrappedLosslessFactory {
         LosslessWrappedERC20Extensible newWrappedToken = new LosslessWrappedERC20Extensible(
                 _token,
                 name,
-                symbol
+                symbol,
+                msg.sender
             );
 
         emit RegisterExtensibleToken(_token, newWrappedToken);
