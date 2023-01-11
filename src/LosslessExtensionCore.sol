@@ -21,13 +21,13 @@ abstract contract LosslessExtensionCore is
 
     EnumerableSet.AddressSet internal _extensions;
 
-    address public _losslessCoreExtension;
-    address public _beforeTransferBase;
-    address public _afterTransferBase;
-    address public _beforeMintBase;
-    address public _afterMintBase;
-    address public _beforeBurnBase;
-    address public _afterBurnBase;
+    address public losslessCoreExtension;
+    address public beforeTransferBase;
+    address public afterTransferBase;
+    address public beforeMintBase;
+    address public afterMintBase;
+    address public beforeBurnBase;
+    address public afterBurnBase;
 
     bytes4 private constant _CREATOR_CORE_V1 = 0x28f10a21;
 
@@ -89,28 +89,28 @@ abstract contract LosslessExtensionCore is
     // LOSSLESS CORE EXTENSION
     /// @notice Set the Lossless Core Extension
     function setLosslessCoreExtension() external requireExtension {
-        _losslessCoreExtension = msg.sender;
+        losslessCoreExtension = msg.sender;
         emit SetLosslessCoreExtension(msg.sender);
     }
 
     // BEFORE TRANSFER EXTENSION
     /// @notice Set the Before Transfer Extension
     function setBeforeTransferExtension() external requireExtension {
-        _beforeTransferBase = msg.sender;
+        beforeTransferBase = msg.sender;
         emit BeforeTransferUpdated(msg.sender);
     }
 
     // AFTER TRANSFER EXTENSION
     /// @notice Set the After Transfer Extension
     function setAfterTransferExtension() external requireExtension {
-        _afterTransferBase = msg.sender;
+        afterTransferBase = msg.sender;
         emit AfterTransferUpdated(msg.sender);
     }
 
     // BEFORE MINT EXTENSION
     /// @notice Set the Before Mint Extension
     function setBeforeMintExtension() external requireExtension {
-        _beforeMintBase = msg.sender;
+        beforeMintBase = msg.sender;
         emit BeforeMintUpdated(msg.sender);
     }
 
@@ -118,7 +118,7 @@ abstract contract LosslessExtensionCore is
 
     /// @notice Set the After Mint Extension
     function setAfterMintExtension() external requireExtension {
-        _afterMintBase = msg.sender;
+        afterMintBase = msg.sender;
         emit AfterMintUpdated(msg.sender);
     }
 
@@ -126,7 +126,7 @@ abstract contract LosslessExtensionCore is
 
     /// @notice Set the Before Burn Extension
     function setBeforeBurnExtension() external requireExtension {
-        _beforeBurnBase = msg.sender;
+        beforeBurnBase = msg.sender;
         emit BeforeBurnUpdated(msg.sender);
     }
 
@@ -134,7 +134,7 @@ abstract contract LosslessExtensionCore is
 
     // @notice Set the After Burn Extension
     function setAfterBurnExtension() external requireExtension {
-        _afterBurnBase = msg.sender;
+        afterBurnBase = msg.sender;
         emit AfterBurnUpdated(msg.sender);
     }
 }

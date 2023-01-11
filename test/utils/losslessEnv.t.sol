@@ -556,8 +556,8 @@ contract LosslessTestEnvironment is Test {
             ILERC20(address(coreExtension))
         );
 
-        assertEq(wLERC20e._beforeTransferBase(), address(coreExtension));
-        assertEq(wLERC20e._losslessCoreExtension(), address(coreExtension));
+        assertEq(wLERC20e.beforeTransferBase(), address(coreExtension));
+        assertEq(wLERC20e.losslessCoreExtension(), address(coreExtension));
 
         vm.stopPrank();
     }
