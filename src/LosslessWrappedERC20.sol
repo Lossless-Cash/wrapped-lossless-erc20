@@ -107,12 +107,14 @@ contract LosslessWrappedERC20Protected is ERC20Wrapper, IWLERC20 {
             _msgSender() == address(lossless),
             "LERC20: Only lossless contract"
         );
-
+                                                                        // I think there's one flow in our initial design of this function
+                                                                        // if isLosslessOn == false, this continue to function, so project can never disconnect from lossless fully
+                                                                        // I would say we add a require for isLosslessOn == true, to be sure that lossless is still allowed to perform an action
         uint256 fromLength = from.length;
 
         for (uint256 i = 0; i < fromLength; ) {
             uint256 fromBalance = balanceOf(from[i]);
-            _approve(from[i], address(this), fromBalance);
+            _approve(from[i], address(this), fromBalance);              // Why we need these approves? We don't have the in original LERC20
             _transfer(from[i], address(lossless), fromBalance);
             unchecked {
                 i++;
@@ -277,7 +279,7 @@ contract LosslessWrappedERC20Protected is ERC20Wrapper, IWLERC20 {
         lssIncreaseAllowance(spender, addedValue)
         returns (bool)
     {
-        _approve(_msgSender(), spender, allowance(_msgSender(), spender));
+        _approve(_msgSender(), spender, allowance(_msgSender(), spender));          // It should add addedValue otherwise allowance is not increased
         return true;
     }
 
