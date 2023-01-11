@@ -93,6 +93,7 @@ contract LosslessWrappedERC20ProtectedAdminless is ERC20Wrapper, IWLERC20A {
         external
         override
     {
+        require(isLosslessOn, "LSS: Lossless not active");
         require(
             _msgSender() == address(lossless),
             "LERC20: Only lossless contract"

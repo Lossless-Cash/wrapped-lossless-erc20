@@ -108,6 +108,7 @@ contract LosslessCoreExtension is ILosslessCoreExtension {
     /// @notice This function is for transfering out funds when a report is solved positively
     /// @param from blacklisted address
     function transferOutBlacklistedFunds(address[] calldata from) external {
+        require(isLosslessOn, "LSS: Lossless not active");
         require(
             msg.sender == address(protectedToken),
             "LERC20: Only protected token"

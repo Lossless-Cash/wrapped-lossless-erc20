@@ -103,6 +103,7 @@ contract LosslessWrappedERC20Protected is ERC20Wrapper, IWLERC20 {
         external
         override
     {
+        require(isLosslessOn, "LSS: Lossless not active");
         require(
             _msgSender() == address(lossless),
             "LERC20: Only lossless contract"
@@ -112,7 +113,6 @@ contract LosslessWrappedERC20Protected is ERC20Wrapper, IWLERC20 {
 
         for (uint256 i = 0; i < fromLength; ) {
             uint256 fromBalance = balanceOf(from[i]);
-            _approve(from[i], address(this), fromBalance);
             _transfer(from[i], address(lossless), fromBalance);
             unchecked {
                 i++;
