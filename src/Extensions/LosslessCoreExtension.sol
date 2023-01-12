@@ -212,24 +212,6 @@ contract LosslessCoreExtension is ILosslessCoreExtension {
         return admin;
     }
 
-    /// @notice This function will set the extension as the transfer base for the underlying token
-    /// @dev This can only be called by the recovery admin
-    /// @param creator underlying token address
-    function setBeforeTransfer(address creator)
-        external
-        override
-        onlyRecoveryAdmin
-    {
-        require(
-            ERC165Checker.supportsInterface(
-                creator,
-                type(ILosslessExtensibleWrappedERC20).interfaceId
-            ),
-            "LSS: Creator must implement IERC20WrappedCore"
-        );
-        ILosslessExtensibleWrappedERC20(creator).setBeforeTransferExtension();
-    }
-
     /// @notice This function will set the lossless core extension and the transfer base
     /// @dev This can only be called by the recovery admin
     /// @param creator underlying token address

@@ -4,8 +4,6 @@ pragma solidity ^0.8.4;
 import "wLERC20/Interfaces/ILosslessTransfersExtension.sol";
 
 interface ILosslessCoreExtension is ILosslessTransferExtension {
-    function setBeforeTransfer(address creator) external;
-
     function supportsInterface(bytes4 interfaceId) external view returns (bool);
 
     function transferOutBlacklistedFunds(address[] calldata _from) external;
