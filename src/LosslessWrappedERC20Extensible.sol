@@ -19,8 +19,16 @@ contract LosslessWrappedERC20Extensible is
     constructor(
         IERC20 _underlyingToken,
         string memory _name,
-        string memory _symbol
-    ) ERC20(_name, _symbol) ERC20Wrapper(_underlyingToken) {}
+        string memory _symbol,
+        address _admin
+    ) ERC20(_name, _symbol) ERC20Wrapper(_underlyingToken) {
+        admin = _admin;
+    }
+
+    modifier onlyAdmin() {
+        require(msg.sender == admin, "LSS: Only admin");
+        _;
+    }
 
     /// @notice Determines whether the contract implements the given interface.
     /// @param interfaceId The interface identifier to check.
@@ -43,6 +51,7 @@ contract LosslessWrappedERC20Extensible is
     function registerExtension(address extension)
         external
         override(ICoreExtension, ILosslessExtensibleWrappedERC20)
+        onlyAdmin
     {
         _registerExtension(extension);
     }
@@ -52,6 +61,7 @@ contract LosslessWrappedERC20Extensible is
     function unregisterExtension(address extension)
         external
         override(ICoreExtension, ILosslessExtensibleWrappedERC20)
+        onlyAdmin
     {
         _unregisterExtension(extension);
     }
@@ -81,11 +91,6 @@ contract LosslessWrappedERC20Extensible is
         } else {
             revert("LSS: Lossless Core Extension not registered");
         }
-    }
-
-    function setAdmin(address _admin) public {
-        require(msg.sender != losslessCoreExtension, "Only Core Extension");
-        admin = _admin;
     }
 
     function _afterTokenTransfer(

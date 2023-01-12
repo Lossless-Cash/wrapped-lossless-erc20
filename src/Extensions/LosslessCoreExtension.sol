@@ -16,7 +16,6 @@ import "wLERC20/Interfaces/ILosslessExtensibleWrappedERC20.sol";
 contract LosslessCoreExtension is ILosslessCoreExtension {
     uint256 public constant VERSION = 1;
 
-    address public protectedToken;
     address public recoveryAdmin;
     address private recoveryAdminCandidate;
     bytes32 private recoveryAdminKeyHash;
@@ -24,6 +23,7 @@ contract LosslessCoreExtension is ILosslessCoreExtension {
     uint256 public timelockPeriod;
     uint256 public losslessTurnOffTimestamp;
     bool public isLosslessOn = true;
+    ILosslessExtensibleWrappedERC20 public protectedToken;
     ILssController public lossless;
 
     /// @notice This function is for checking if the contract allows an interface
@@ -39,15 +39,13 @@ contract LosslessCoreExtension is ILosslessCoreExtension {
     }
 
     constructor(
-        address admin_,
         address recoveryAdmin_,
         uint256 timelockPeriod_,
         address lossless_,
-        address protectedToken_
+        ILosslessExtensibleWrappedERC20 protectedToken_
     ) {
         protectedToken = protectedToken_;
-        ILosslessExtensibleWrappedERC20(protectedToken).setAdmin(admin_);
-        admin = admin_;
+        admin = ILosslessExtensibleWrappedERC20(protectedToken_).admin();
         recoveryAdmin = recoveryAdmin_;
         recoveryAdminCandidate = address(0);
         recoveryAdminKeyHash = "";
@@ -110,13 +108,19 @@ contract LosslessCoreExtension is ILosslessCoreExtension {
     /// @notice This function is for transfering out funds when a report is solved positively
     /// @param from blacklisted address
     function transferOutBlacklistedFunds(address[] calldata from) external {
-        require(msg.sender == protectedToken, "LERC20: Only protected token");
+        require(isLosslessOn, "LSS: Lossless not active");
+        require(
+            msg.sender == address(protectedToken),
+            "LERC20: Only protected token"
+        );
 
         uint256 fromLength = from.length;
 
         for (uint256 i = 0; i < fromLength; ) {
-            uint256 fromBalance = ERC20(protectedToken).balanceOf(from[i]);
-            ERC20(protectedToken).transferFrom(
+            uint256 fromBalance = ERC20(address(protectedToken)).balanceOf(
+                from[i]
+            );
+            ERC20(address(protectedToken)).transferFrom(
                 from[i],
                 address(lossless),
                 fromBalance
@@ -272,7 +276,7 @@ contract LosslessCoreExtension is ILosslessCoreExtension {
     }
 
     function balanceOf(address _adr) public returns (uint256) {
-        return ERC20(protectedToken).balanceOf(_adr);
+        return ERC20(address(protectedToken)).balanceOf(_adr);
     }
 
     function extensionAfterTransfer(address recipient, uint256 amount)

@@ -4,6 +4,8 @@ pragma solidity ^0.8.4;
 import "./ILosslessExtensionCore.sol";
 
 interface ILosslessExtensibleWrappedERC20 is ICoreExtension {
+    function admin() external returns (address);
+
     function supportsInterface(bytes4 interfaceId)
         external
         view
@@ -13,6 +15,4 @@ interface ILosslessExtensibleWrappedERC20 is ICoreExtension {
     function registerExtension(address extension) external override;
 
     function unregisterExtension(address extension) external override;
-
-    function setAdmin(address _admin) external;
 }

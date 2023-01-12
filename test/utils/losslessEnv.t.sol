@@ -531,10 +531,9 @@ contract LosslessTestEnvironment is Test {
 
         coreExtension = new LosslessCoreExtension(
             tokenOwner,
-            tokenOwner,
             settlementTimelock,
             address(lssController),
-            address(wLERC20e)
+            wLERC20e
         );
 
         wLERC20e.registerExtension(address(coreExtension));
