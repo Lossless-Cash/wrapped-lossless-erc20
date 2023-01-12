@@ -16,19 +16,18 @@ abstract contract LosslessExtensionCore is
     ICoreExtension,
     ERC165
 {
-    using Strings for uint256;
     using EnumerableSet for EnumerableSet.AddressSet;
     using AddressUpgradeable for address;
 
     EnumerableSet.AddressSet internal _extensions;
 
-    address internal _losslessCoreExtension;
-    address internal _beforeTransferBase;
-    address internal _afterTransferBase;
-    address internal _beforeMintBase;
-    address internal _afterMintBase;
-    address internal _beforeBurnBase;
-    address internal _afterBurnBase;
+    address public losslessCoreExtension;
+    address public beforeTransferBase;
+    address public afterTransferBase;
+    address public beforeMintBase;
+    address public afterMintBase;
+    address public beforeBurnBase;
+    address public afterBurnBase;
 
     bytes4 private constant _CREATOR_CORE_V1 = 0x28f10a21;
 
@@ -47,11 +46,12 @@ abstract contract LosslessExtensionCore is
 
     /// @notice Require that the caller is a registered extension
     /// @dev Reverts if the caller is not registered as an extension
-    function requireExtension() internal view {
+    modifier requireExtension() {
         require(
             _extensions.contains(msg.sender),
             "LSS: Must be registered extension"
         );
+        _;
     }
 
     /// @notice Get the registered extensions
@@ -88,119 +88,53 @@ abstract contract LosslessExtensionCore is
 
     // LOSSLESS CORE EXTENSION
     /// @notice Set the Lossless Core Extension
-    function setLosslessCoreExtension() external {
-        requireExtension();
-        _setLosslessCoreExtension(msg.sender);
-    }
-
-    function _setLosslessCoreExtension(address extension) internal {
-        _losslessCoreExtension = extension;
-        //emit ApproveTransferUpdated(extension);
-    }
-
-    /// @notice Get the Lossless Core Extension
-    /// @return address of the extension contract
-    function getLosslessCore() external view returns (address) {
-        return _losslessCoreExtension;
+    function setLosslessCoreExtension() external requireExtension {
+        losslessCoreExtension = msg.sender;
+        emit SetLosslessCoreExtension(msg.sender);
     }
 
     // BEFORE TRANSFER EXTENSION
     /// @notice Set the Before Transfer Extension
-    function setBeforeTransferExtension() external override {
-        requireExtension();
-        _setBeforeTransferBase(msg.sender);
-    }
-
-    function _setBeforeTransferBase(address extension) internal {
-        _beforeTransferBase = extension;
-        emit BeforeTransferUpdated(extension);
-    }
-
-    function getBeforeTransfer() external view returns (address) {
-        return _beforeTransferBase;
+    function setBeforeTransferExtension() external requireExtension {
+        beforeTransferBase = msg.sender;
+        emit BeforeTransferUpdated(msg.sender);
     }
 
     // AFTER TRANSFER EXTENSION
     /// @notice Set the After Transfer Extension
-    function setAfterTransferExtension() external override {
-        requireExtension();
-        _setAfterTransferBase(msg.sender);
-    }
-
-    function _setAfterTransferBase(address extension) internal {
-        _afterTransferBase = extension;
-        emit AfterTransferUpdated(extension);
-    }
-
-    function getAfterTransfer() external view returns (address) {
-        return _afterTransferBase;
+    function setAfterTransferExtension() external requireExtension {
+        afterTransferBase = msg.sender;
+        emit AfterTransferUpdated(msg.sender);
     }
 
     // BEFORE MINT EXTENSION
     /// @notice Set the Before Mint Extension
-    function setBeforeMintExtension() external override {
-        requireExtension();
-        _setBeforeMintBase(msg.sender);
-    }
-
-    /// @notice Set the After Mint Extension
-    function _setBeforeMintBase(address extension) internal {
-        _beforeMintBase = extension;
-        emit BeforeMintUpdated(extension);
-    }
-
-    function getBeforeMint() external view returns (address) {
-        return _beforeMintBase;
+    function setBeforeMintExtension() external requireExtension {
+        beforeMintBase = msg.sender;
+        emit BeforeMintUpdated(msg.sender);
     }
 
     // AFTER MINT EXTENSION
 
     /// @notice Set the After Mint Extension
-    function setAfterMintExtension() external override {
-        requireExtension();
-        _setAfterMintBase(msg.sender);
-    }
-
-    function _setAfterMintBase(address extension) internal {
-        _afterMintBase = extension;
-        emit AfterMintUpdated(extension);
-    }
-
-    function getAfterMint() external view returns (address) {
-        return _afterMintBase;
+    function setAfterMintExtension() external requireExtension {
+        afterMintBase = msg.sender;
+        emit AfterMintUpdated(msg.sender);
     }
 
     // BEFORE BURN EXTENSION
 
     /// @notice Set the Before Burn Extension
-    function setBeforeBurnExtension() external override {
-        requireExtension();
-        _setBeforeBurnBase(msg.sender);
-    }
-
-    function _setBeforeBurnBase(address extension) internal {
-        _beforeBurnBase = extension;
-        emit BeforeBurnUpdated(extension);
-    }
-
-    function getBeforeBurn() external view returns (address) {
-        return _beforeBurnBase;
+    function setBeforeBurnExtension() external requireExtension {
+        beforeBurnBase = msg.sender;
+        emit BeforeBurnUpdated(msg.sender);
     }
 
     // AFTER BURN EXTENSION
 
     // @notice Set the After Burn Extension
-    function setAfterBurnExtension() external override {
-        requireExtension();
-        _setAfterBurnBase(msg.sender);
-    }
-
-    function _setAfterBurnBase(address extension) internal {
-        _afterBurnBase = extension;
-        emit AfterBurnUpdated(extension);
-    }
-
-    function getAfterBurn() external view returns (address) {
-        return _afterBurnBase;
+    function setAfterBurnExtension() external requireExtension {
+        afterBurnBase = msg.sender;
+        emit AfterBurnUpdated(msg.sender);
     }
 }

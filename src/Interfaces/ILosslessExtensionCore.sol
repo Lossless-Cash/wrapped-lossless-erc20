@@ -13,6 +13,7 @@ interface ICoreExtension is IERC165 {
         address indexed sender
     );
 
+    event SetLosslessCoreExtension(address extension);
     event BeforeTransferUpdated(address extension);
     event AfterTransferUpdated(address extension);
     event BeforeMintUpdated(address extension);
