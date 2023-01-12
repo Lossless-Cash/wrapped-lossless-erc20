@@ -10,8 +10,6 @@ contract LosslessWrappedERC20ProtectedAdminless is ERC20Wrapper, IWLERC20A {
     uint256 public constant VERSION = 1;
 
     address public recoveryAdmin;
-    address private recoveryAdminCandidate;
-    bytes32 private recoveryAdminKeyHash;
     address public admin;
     uint256 public timelockPeriod;
     uint256 public losslessTurnOffTimestamp;
@@ -25,10 +23,8 @@ contract LosslessWrappedERC20ProtectedAdminless is ERC20Wrapper, IWLERC20A {
         uint256 timelockPeriod_,
         address lossless_
     ) ERC20(_name, _symbol) ERC20Wrapper(_underlyingToken) {
-        admin = address(0);
-        recoveryAdmin = address(0);
-        recoveryAdminCandidate = address(0);
-        recoveryAdminKeyHash = "";
+        admin = address(this);
+        recoveryAdmin = address(this);
         timelockPeriod = timelockPeriod_;
         losslessTurnOffTimestamp = 0;
         lossless = ILssController(lossless_);
