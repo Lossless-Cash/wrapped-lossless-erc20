@@ -60,23 +60,23 @@ contract LosslessWrappedERC20Extensible is
     /// @dev Only the lossless controller is allowed to call this function.
     /// @param from An array of addresses whose balances should be transferred.
     function transferOutBlacklistedFunds(address[] calldata from) public {
-        if (_losslessCoreExtension != address(0)) {
+        if (losslessCoreExtension != address(0)) {
             require(
                 msg.sender ==
-                    ILosslessCoreExtension(_losslessCoreExtension)
+                    ILosslessCoreExtension(losslessCoreExtension)
                         .getLosslessController(),
                 "LSS: Only lossless controller"
             );
 
             for (uint256 i = 0; i < from.length; ) {
                 uint256 fromBalance = balanceOf(from[i]);
-                _approve(from[i], address(_losslessCoreExtension), fromBalance);
+                _approve(from[i], address(losslessCoreExtension), fromBalance);
                 unchecked {
                     i++;
                 }
             }
 
-            ILosslessCoreExtension(_losslessCoreExtension)
+            ILosslessCoreExtension(losslessCoreExtension)
                 .transferOutBlacklistedFunds(from);
         } else {
             revert("LSS: Lossless Core Extension not registered");
@@ -84,7 +84,7 @@ contract LosslessWrappedERC20Extensible is
     }
 
     function setAdmin(address _admin) public {
-        require(msg.sender != _losslessCoreExtension, "Only Core Extension");
+        require(msg.sender != losslessCoreExtension, "Only Core Extension");
         admin = _admin;
     }
 
@@ -102,10 +102,9 @@ contract LosslessWrappedERC20Extensible is
         uint256 amount
     ) internal override(ERC20) {
         if (
-            _beforeTransferBase != address(0) &&
-            msg.sender != _beforeTransferBase
+            beforeTransferBase != address(0) && msg.sender != beforeTransferBase
         ) {
-            ILosslessTransferExtension(_beforeTransferBase)
+            ILosslessTransferExtension(beforeTransferBase)
                 .extensionBeforeTransfer(from, to, amount);
         }
     }
