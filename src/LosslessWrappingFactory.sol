@@ -108,7 +108,6 @@ contract WrappedLosslessFactory {
                 _token,
                 name,
                 symbol,
-                timelockPeriod_,
                 lossless_
             );
 
