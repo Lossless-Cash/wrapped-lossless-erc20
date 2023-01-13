@@ -56,7 +56,7 @@ contract WrappedLosslessFactory {
         require(
             callDetectOwnable(address(_token)) ||
                 callDetectAccessControl(address(_token)),
-            "LSS: Needs to implement admin or ownership"
+            "LSS: Needs to implement admin or ownership"                    // Maybe this is not needed, maybe some projects don't have admin on their erc20, but want to have admin voting power on lossless protocol
         );
 
         string memory name = string(
@@ -85,13 +85,13 @@ contract WrappedLosslessFactory {
 
     function registerAdminlessProtectedToken(
         IERC20 _token,
-        uint256 timelockPeriod_,
+        uint256 timelockPeriod_,                // unused variable
         address lossless_
     ) public returns (LosslessWrappedERC20ProtectedAdminless) {
         require(
             !callDetectOwnable(address(_token)) &&
                 !callDetectAccessControl(address(_token)),
-            "LSS: only for adminless tokens"
+            "LSS: only for adminless tokens"                            // Maybe we don't need this check, some projects might still want adminless tokens even if they have admins on their token
         );
 
         string memory name = string(
@@ -116,7 +116,7 @@ contract WrappedLosslessFactory {
     }
 
     function callDetectOwnable(address _token) public view returns (bool) {
-        // Encode the function selector and arguments for the `getRoleAdmin` function
+        // Encode the function selector and arguments for the `getRoleAdmin` function           // I think this comment is not needed
         bytes memory data = abi.encodeWithSelector(
             bytes4(keccak256("owner()"))
         );
@@ -124,7 +124,7 @@ contract WrappedLosslessFactory {
         // Call the `getRoleAdmin` function using the STATICCALL opcode
         // pragma ignore "Unused local variable."
 
-        (bool success, bytes memory returnValue) = address(_token).staticcall(
+        (bool success, bytes memory returnValue) = address(_token).staticcall(      // I think you can use (bool success,) if you don't need the second variable
             data
         );
 
@@ -136,7 +136,7 @@ contract WrappedLosslessFactory {
         view
         returns (bool)
     {
-        // Encode the function selector and arguments for the `getRoleAdmin` function
+        // Encode the function selector and arguments for the `getRoleAdmin` function       // I think this comment is not needed
         bytes memory data = abi.encodeWithSelector(
             bytes4(keccak256("getRoleAdmin(bytes32)")),
             "0x00"
@@ -144,7 +144,7 @@ contract WrappedLosslessFactory {
 
         // Call the `getRoleAdmin` function using the STATICCALL opcode
         // pragma ignore "Unused local variable."
-        (bool success, bytes memory returnValue) = address(_token).staticcall(
+        (bool success, bytes memory returnValue) = address(_token).staticcall(  // I think you can use (bool success,) if you don't need the second variable
             data
         );
 

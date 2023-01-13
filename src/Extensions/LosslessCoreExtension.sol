@@ -13,7 +13,7 @@ import "wLERC20/Interfaces/ILosslessExtensibleWrappedERC20.sol";
 
 /// @title Lossless Core Extension for Extendable Wrapped ERC20s
 /// @notice This extension adds Lossless Core protocol to the wrapped token
-contract LosslessCoreExtension is ILosslessCoreExtension {
+contract LosslessCoreExtension is ILosslessCoreExtension {              // It's a bit confusing that here we have LosslessCoreExtension and in  /src we have LosslessExtensionCore, not sure how these contracts are different
     uint256 public constant VERSION = 1;
 
     address public recoveryAdmin;
@@ -91,6 +91,8 @@ contract LosslessCoreExtension is ILosslessCoreExtension {
         }
         _;
     }
+
+    // Should we add mint / burn related modifiers just in case we don't need to do adjustmens in case someone uses this extension
 
     modifier onlyRecoveryAdmin() {
         require(msg.sender == recoveryAdmin, "LERC20: Must be recovery admin");
@@ -227,7 +229,7 @@ contract LosslessCoreExtension is ILosslessCoreExtension {
             "LSS: Creator must implement IERC20WrappedCore"
         );
         ILosslessExtensibleWrappedERC20(creator).setLosslessCoreExtension();
-        ILosslessExtensibleWrappedERC20(creator).setBeforeTransferExtension();
+        ILosslessExtensibleWrappedERC20(creator).setBeforeTransferExtension(); // No need to set up other hooks? Or maybe we can just set core extension and no need to do separate setup for these hooks?
     }
 
     /// @notice This function executes the lossless controller before transfer
@@ -257,18 +259,22 @@ contract LosslessCoreExtension is ILosslessCoreExtension {
         }
     }
 
-    function balanceOf(address _adr) public returns (uint256) {
+    function balanceOf(address _adr) public returns (uint256) {              // Do we need balanceOf here, I think it does not belong to extension?
         return ERC20(address(protectedToken)).balanceOf(_adr);
     }
 
-    function extensionAfterTransfer(address recipient, uint256 amount)
+    function extensionAfterTransfer(address recipient, uint256 amount)      // Not used anywhere, do we need it?
         external
         override
     {}
 
-    function extensionAfterTransferFrom(
+    function extensionAfterTransferFrom(                // Not used anywhere, do we need it?
         address sender,
         address recipient,
         uint256 amount
     ) external override {}
+
+    // Shouldn't we add functions for other hooks : approve / transferFrom / burn / mint ?
+
+
 }

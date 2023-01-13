@@ -74,7 +74,7 @@ contract LosslessWrappedERC20Extensible is
             require(
                 msg.sender ==
                     ILosslessCoreExtension(losslessCoreExtension)
-                        .getLosslessController(),
+                        .getLosslessController(),                           
                 "LSS: Only lossless controller"
             );
 
@@ -101,8 +101,8 @@ contract LosslessWrappedERC20Extensible is
         super._afterTokenTransfer(from, to, amount);
     }
 
-    function _beforeTokenTransfer(
-        address from,
+    function _beforeTokenTransfer(                                  // This has a hook for before transfer that call extension, but there are no   
+        address from,                                               // hooks for mint / burn / approve / approve / transferFrom, not sure if it's on purpose
         address to,
         uint256 amount
     ) internal override(ERC20) {

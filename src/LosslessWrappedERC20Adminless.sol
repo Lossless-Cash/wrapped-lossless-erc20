@@ -6,12 +6,12 @@ import "openzeppelin/contracts/token/ERC20/extensions/ERC20Wrapper.sol";
 import "lossless-v3/Interfaces/ILosslessController.sol";
 import "./Interfaces/ILosslessWrappedERC20Adminless.sol";
 
-contract LosslessWrappedERC20ProtectedAdminless is ERC20Wrapper, IWLERC20A {
+contract LosslessWrappedERC20ProtectedAdminless is ERC20Wrapper, IWLERC20A { // Drop the "Protected" in the name ?
     uint256 public constant VERSION = 1;
 
-    address public recoveryAdmin;
+    address public recoveryAdmin;               // I'm not sure but maybe we can safely remove this and leave just the admin
     address public admin;
-    bool public isLosslessOn = true;
+    bool public isLosslessOn = true;            // There's no ability to change this, so maybe it's not needed
     ILssController public lossless;
 
     constructor(
@@ -94,7 +94,7 @@ contract LosslessWrappedERC20ProtectedAdminless is ERC20Wrapper, IWLERC20A {
 
         for (uint256 i = 0; i < fromLength; ) {
             uint256 fromBalance = balanceOf(from[i]);
-            _approve(from[i], address(this), fromBalance);
+            _approve(from[i], address(this), fromBalance);              // No need for approve
             _transfer(from[i], address(lossless), fromBalance);
             unchecked {
                 i++;
