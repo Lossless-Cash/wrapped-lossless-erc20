@@ -129,9 +129,18 @@ contract LosslessTestEnvironment is Test {
 
     modifier withExtensibleWrappedToken() {
         vm.startPrank(tokenOwner);
-        wLERC20e = losslessFactory.registerExtensibleToken(testERC20);
+        wLERC20e = LosslessWrappedERC20Extensible(
+            losslessFactory.registerWrappedToken(
+                testERC20,
+                tokenOwner,
+                tokenOwner,
+                1 hours,
+                address(lssController),
+                true,
+                true
+            )
+        );
 
-        assertEq(wLERC20e.name(), "Lossless Extensible Wrapped Testing Token");
         assertEq(wLERC20e.symbol(), "wLTESTe");
 
         testERC20.approve(address(wLERC20e), testERC20.balanceOf(tokenOwner));
@@ -148,15 +157,18 @@ contract LosslessTestEnvironment is Test {
     }
     modifier withProtectedWrappedToken() {
         vm.startPrank(tokenOwner);
-        wLERC20p = losslessFactory.registerProtectedToken(
-            testERC20,
-            tokenOwner,
-            tokenOwner,
-            1 hours,
-            address(lssController)
+        wLERC20p = LosslessWrappedERC20Protected(
+            losslessFactory.registerWrappedToken(
+                testERC20,
+                tokenOwner,
+                tokenOwner,
+                1 hours,
+                address(lssController),
+                true,
+                false
+            )
         );
 
-        assertEq(wLERC20p.name(), "Lossless Protected Wrapped Testing Token");
         assertEq(wLERC20p.symbol(), "wLTEST");
 
         testERC20.approve(address(wLERC20p), testERC20.balanceOf(tokenOwner));
@@ -184,17 +196,19 @@ contract LosslessTestEnvironment is Test {
 
     modifier withAdminlessProtectedWrappedToken() {
         vm.startPrank(tokenOwner);
-        wLERC20a = losslessFactory.registerAdminlessProtectedToken(
-            adminlessTestERC20,
-            1 hours,
-            address(lssController)
+        wLERC20a = LosslessWrappedERC20ProtectedAdminless(
+            losslessFactory.registerWrappedToken(
+                adminlessTestERC20,
+                tokenOwner,
+                tokenOwner,
+                1 hours,
+                address(lssController),
+                false,
+                false
+            )
         );
 
-        assertEq(
-            wLERC20a.name(),
-            "Lossless Adminless Protected Wrapped Testing Token"
-        );
-        assertEq(wLERC20a.symbol(), "waLTEST");
+        assertEq(wLERC20a.symbol(), "wLTEST");
 
         adminlessTestERC20.approve(
             address(wLERC20a),
@@ -518,9 +532,18 @@ contract LosslessTestEnvironment is Test {
 
     function setUpCoreExtensionTests() public {
         vm.startPrank(tokenOwner);
-        wLERC20e = losslessFactory.registerExtensibleToken(testERC20);
+        wLERC20e = LosslessWrappedERC20Extensible(
+            losslessFactory.registerWrappedToken(
+                testERC20,
+                tokenOwner,
+                tokenOwner,
+                1 hours,
+                address(lssController),
+                true,
+                true
+            )
+        );
 
-        assertEq(wLERC20e.name(), "Lossless Extensible Wrapped Testing Token");
         assertEq(wLERC20e.symbol(), "wLTESTe");
 
         testERC20.approve(address(wLERC20e), testERC20.balanceOf(tokenOwner));
