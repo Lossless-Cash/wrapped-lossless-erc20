@@ -17,7 +17,7 @@ import "wLERC20/LosslessWrappedERC20Extensible.sol";
 import "wLERC20/LosslessWrappedERC20.sol";
 import "wLERC20/LosslessWrappedERC20Adminless.sol";
 import "wLERC20/LosslessWrappingFactory.sol";
-import "wLERC20/Extensions/LosslessCoreExtension.sol";
+import "wLERC20/Extensions/HackMitigationExtension.sol";
 
 import "forge-std/Test.sol";
 

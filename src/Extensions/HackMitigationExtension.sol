@@ -8,12 +8,12 @@ import "openzeppelin/contracts/token/ERC20/ERC20.sol";
 
 import "lossless-v3/Interfaces/ILosslessController.sol";
 
-import "wLERC20/Interfaces/ILosslessCoreExtension.sol";
+import "wLERC20/Interfaces/IHackMitigationExtension.sol";
 import "wLERC20/Interfaces/ILosslessExtensibleWrappedERC20.sol";
 
 /// @title Lossless Core Extension for Extendable Wrapped ERC20s
 /// @notice This extension adds Lossless Core protocol to the wrapped token
-contract LosslessCoreExtension is ILosslessCoreExtension {
+contract LosslessCoreExtension is IHackMitigationExtension {
     uint256 public constant VERSION = 1;
 
     address public recoveryAdmin;
@@ -35,7 +35,7 @@ contract LosslessCoreExtension is ILosslessCoreExtension {
         override
         returns (bool)
     {
-        return interfaceId == type(ILosslessCoreExtension).interfaceId;
+        return interfaceId == type(IHackMitigationExtension).interfaceId;
     }
 
     constructor(

@@ -2,7 +2,7 @@
 pragma solidity ^0.8.13;
 
 import "forge-std/Script.sol";
-import "../src/Extensions/LosslessCoreExtension.sol";
+import "../src/Extensions/HackMitigationExtension.sol";
 
 contract DeployExtensible is Script {
     function run() external {
