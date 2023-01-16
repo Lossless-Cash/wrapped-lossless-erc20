@@ -9,7 +9,6 @@ import "./Interfaces/ILosslessWrappedERC20Adminless.sol";
 contract LosslessWrappedERC20Adminless is ERC20Wrapper, IWLERC20A {
     uint256 public constant VERSION = 1;
 
-    address public recoveryAdmin;
     address public admin;
     bool public isLosslessOn = true;
     ILssController public lossless;
@@ -21,7 +20,6 @@ contract LosslessWrappedERC20Adminless is ERC20Wrapper, IWLERC20A {
         address lossless_
     ) ERC20(_name, _symbol) ERC20Wrapper(_underlyingToken) {
         admin = address(this);
-        recoveryAdmin = address(this);
         lossless = ILssController(lossless_);
     }
 
