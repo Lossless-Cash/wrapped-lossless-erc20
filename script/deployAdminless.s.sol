@@ -12,7 +12,7 @@ contract DeployAdminless is Script {
 
         vm.startBroadcast(deployerPrivateKey);
 
-        LosslessWrappedERC20ProtectedAdminless adminlessWrapped = new LosslessWrappedERC20ProtectedAdminless(
+        LosslessWrappedERC20Adminless adminlessWrapped = new LosslessWrappedERC20Adminless(
                 IERC20(underlyingToken),
                 "Test Adminless",
                 "wLTSTe",

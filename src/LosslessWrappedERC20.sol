@@ -8,7 +8,7 @@ import "./Interfaces/ILosslessWrappedERC20.sol";
 
 /// @title Lossless Protected Wrapped ERC20
 /// @notice This contract wraps an ERC20 with Lossless Core Protocol
-contract LosslessWrappedERC20Protected is ERC20Wrapper, IWLERC20 {
+contract LosslessWrappedERC20 is ERC20Wrapper, IWLERC20 {
     uint256 public constant VERSION = 1;
 
     address public recoveryAdmin;

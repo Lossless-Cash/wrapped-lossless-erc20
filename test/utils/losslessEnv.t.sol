@@ -45,8 +45,8 @@ contract LosslessTestEnvironment is Test {
     TestToken public adminlessTestERC20;
 
     LosslessWrappedERC20Extensible public wLERC20e;
-    LosslessWrappedERC20Protected public wLERC20p;
-    LosslessWrappedERC20ProtectedAdminless public wLERC20a;
+    LosslessWrappedERC20 public wLERC20p;
+    LosslessWrappedERC20Adminless public wLERC20a;
     WrappedLosslessFactory public losslessFactory;
     LosslessCoreExtension public coreExtension;
 
@@ -157,7 +157,7 @@ contract LosslessTestEnvironment is Test {
     }
     modifier withProtectedWrappedToken() {
         vm.startPrank(tokenOwner);
-        wLERC20p = LosslessWrappedERC20Protected(
+        wLERC20p = LosslessWrappedERC20(
             losslessFactory.registerWrappedToken(
                 testERC20,
                 tokenOwner,
@@ -196,7 +196,7 @@ contract LosslessTestEnvironment is Test {
 
     modifier withAdminlessProtectedWrappedToken() {
         vm.startPrank(tokenOwner);
-        wLERC20a = LosslessWrappedERC20ProtectedAdminless(
+        wLERC20a = LosslessWrappedERC20Adminless(
             losslessFactory.registerWrappedToken(
                 adminlessTestERC20,
                 tokenOwner,

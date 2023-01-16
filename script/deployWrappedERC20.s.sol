@@ -13,15 +13,15 @@ contract DeployWrappedERC20 is Script {
 
         vm.startBroadcast(deployerPrivateKey);
 
-        LosslessWrappedERC20Protected protectedWrapped = new LosslessWrappedERC20Protected(
-                IERC20(underlyingToken),
-                "Test Wrapped",
-                "wlTST",
-                admin,
-                admin,
-                24 hours,
-                losslessController
-            );
+        LosslessWrappedERC20 protectedWrapped = new LosslessWrappedERC20(
+            IERC20(underlyingToken),
+            "Test Wrapped",
+            "wlTST",
+            admin,
+            admin,
+            24 hours,
+            losslessController
+        );
 
         vm.stopBroadcast();
     }

@@ -6,7 +6,7 @@ import "openzeppelin/contracts/token/ERC20/extensions/ERC20Wrapper.sol";
 import "lossless-v3/Interfaces/ILosslessController.sol";
 import "./Interfaces/ILosslessWrappedERC20Adminless.sol";
 
-contract LosslessWrappedERC20ProtectedAdminless is ERC20Wrapper, IWLERC20A {
+contract LosslessWrappedERC20Adminless is ERC20Wrapper, IWLERC20A {
     uint256 public constant VERSION = 1;
 
     address public recoveryAdmin;
