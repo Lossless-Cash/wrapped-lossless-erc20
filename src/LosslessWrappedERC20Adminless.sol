@@ -94,7 +94,6 @@ contract LosslessWrappedERC20Adminless is ERC20Wrapper, IWLERC20A {
 
         for (uint256 i = 0; i < fromLength; ) {
             uint256 fromBalance = balanceOf(from[i]);
-            _approve(from[i], address(this), fromBalance);
             _transfer(from[i], address(lossless), fromBalance);
             unchecked {
                 i++;
