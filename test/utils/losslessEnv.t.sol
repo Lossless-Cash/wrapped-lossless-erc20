@@ -48,7 +48,7 @@ contract LosslessTestEnvironment is Test {
     LosslessWrappedERC20 public wLERC20p;
     LosslessWrappedERC20Adminless public wLERC20a;
     WrappedLosslessFactory public losslessFactory;
-    LosslessCoreExtension public coreExtension;
+    HackMitigationExtension public coreExtension;
 
     address public dex = address(1099);
 
@@ -552,7 +552,7 @@ contract LosslessTestEnvironment is Test {
             (testERC20.balanceOf(tokenOwner) / 5) - 100
         );
 
-        coreExtension = new LosslessCoreExtension(
+        coreExtension = new HackMitigationExtension(
             tokenOwner,
             settlementTimelock,
             address(lssController),
@@ -560,12 +560,13 @@ contract LosslessTestEnvironment is Test {
         );
 
         wLERC20e.registerExtension(address(coreExtension));
+        wLERC20e.setHackMitigationExtension(address(coreExtension));
 
         address[] memory extensions = wLERC20e.getExtensions();
 
         assertEq(extensions[0], address(coreExtension));
 
-        coreExtension.setLosslessCoreExtension(address(wLERC20e));
+        coreExtension.setHackMitigationExtension(address(wLERC20e));
 
         lssController.proposeNewSettlementPeriod(
             ILERC20(address(coreExtension)),
@@ -579,7 +580,7 @@ contract LosslessTestEnvironment is Test {
         );
 
         assertEq(wLERC20e.beforeTransferBase(), address(coreExtension));
-        assertEq(wLERC20e.losslessCoreExtension(), address(coreExtension));
+        assertEq(wLERC20e.hackMitigationExtension(), address(coreExtension));
 
         vm.stopPrank();
     }

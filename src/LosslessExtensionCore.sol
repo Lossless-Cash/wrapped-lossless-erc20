@@ -21,13 +21,16 @@ abstract contract LosslessExtensionCore is
 
     EnumerableSet.AddressSet internal _extensions;
 
-    address public losslessCoreExtension;
     address public beforeTransferBase;
     address public afterTransferBase;
+    address public beforeTransferBaseFrom;
+    address public afterTransferBaseFrom;
     address public beforeMintBase;
     address public afterMintBase;
     address public beforeBurnBase;
     address public afterBurnBase;
+    address public beforeBurnBaseFrom;
+    address public afterBurnBaseFrom;
 
     bytes4 private constant _CREATOR_CORE_V1 = 0x28f10a21;
 
@@ -86,13 +89,6 @@ abstract contract LosslessExtensionCore is
         _extensions.remove(extension);
     }
 
-    // LOSSLESS CORE EXTENSION
-    /// @notice Set the Lossless Core Extension
-    function setLosslessCoreExtension() external requireExtension {
-        losslessCoreExtension = msg.sender;
-        emit SetLosslessCoreExtension(msg.sender);
-    }
-
     // BEFORE TRANSFER EXTENSION
     /// @notice Set the Before Transfer Extension
     function setBeforeTransferExtension() external requireExtension {
@@ -105,6 +101,20 @@ abstract contract LosslessExtensionCore is
     function setAfterTransferExtension() external requireExtension {
         afterTransferBase = msg.sender;
         emit AfterTransferUpdated(msg.sender);
+    }
+
+    // BEFORE TRANSFER EXTENSION
+    /// @notice Set the Before Transfer Extension
+    function setBeforeTransferFromExtension() external requireExtension {
+        beforeTransferBaseFrom = msg.sender;
+        emit BeforeTransferFromUpdated(msg.sender);
+    }
+
+    // AFTER TRANSFER EXTENSION
+    /// @notice Set the After Transfer Extension
+    function setAfterTransferFromExtension() external requireExtension {
+        afterTransferBaseFrom = msg.sender;
+        emit AfterTransferFromUpdated(msg.sender);
     }
 
     // BEFORE MINT EXTENSION
@@ -136,5 +146,19 @@ abstract contract LosslessExtensionCore is
     function setAfterBurnExtension() external requireExtension {
         afterBurnBase = msg.sender;
         emit AfterBurnUpdated(msg.sender);
+    }
+
+    /// @notice Set the Before Burn Extension
+    function setBeforeBurnFromExtension() external requireExtension {
+        beforeBurnBaseFrom = msg.sender;
+        emit BeforeBurnFromUpdated(msg.sender);
+    }
+
+    // AFTER BURN EXTENSION
+
+    // @notice Set the After Burn Extension
+    function setAfterBurnFromExtension() external requireExtension {
+        afterBurnBaseFrom = msg.sender;
+        emit AfterBurnFromUpdated(msg.sender);
     }
 }

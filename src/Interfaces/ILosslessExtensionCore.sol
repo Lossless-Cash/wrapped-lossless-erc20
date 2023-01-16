@@ -13,13 +13,16 @@ interface ICoreExtension is IERC165 {
         address indexed sender
     );
 
-    event SetLosslessCoreExtension(address extension);
     event BeforeTransferUpdated(address extension);
     event AfterTransferUpdated(address extension);
+    event BeforeTransferFromUpdated(address extension);
+    event AfterTransferFromUpdated(address extension);
     event BeforeMintUpdated(address extension);
     event AfterMintUpdated(address extension);
     event BeforeBurnUpdated(address extension);
     event AfterBurnUpdated(address extension);
+    event BeforeBurnFromUpdated(address extension);
+    event AfterBurnFromUpdated(address extension);
 
     function getExtensions() external view returns (address[] memory);
 
@@ -27,11 +30,13 @@ interface ICoreExtension is IERC165 {
 
     function unregisterExtension(address extension) external;
 
-    function setLosslessCoreExtension() external;
-
     function setBeforeTransferExtension() external;
 
     function setAfterTransferExtension() external;
+
+    function setBeforeTransferFromExtension() external;
+
+    function setAfterTransferFromExtension() external;
 
     function setBeforeMintExtension() external;
 
@@ -40,4 +45,8 @@ interface ICoreExtension is IERC165 {
     function setBeforeBurnExtension() external;
 
     function setAfterBurnExtension() external;
+
+    function setBeforeBurnFromExtension() external;
+
+    function setAfterBurnFromExtension() external;
 }

@@ -13,7 +13,7 @@ contract DeployExtensible is Script {
 
         vm.startBroadcast(deployerPrivateKey);
 
-        LosslessCoreExtension extensibleWrapped = new LosslessCoreExtension(
+        HackMitigationExtension extensibleWrapped = new HackMitigationExtension(
             admin,
             24 hours,
             losslessController,

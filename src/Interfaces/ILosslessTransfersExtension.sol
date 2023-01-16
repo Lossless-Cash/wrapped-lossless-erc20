@@ -14,7 +14,11 @@ interface ILosslessTransferExtension {
         uint256 amount
     ) external;
 
-    function extensionAfterTransfer(address recipient, uint256 amount) external;
+    function extensionAfterTransfer(
+        address sender,
+        address recipient,
+        uint256 amount
+    ) external;
 
     function extensionAfterTransferFrom(
         address sender,
