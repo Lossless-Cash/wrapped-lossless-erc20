@@ -10,7 +10,6 @@ contract LosslessWrappedERC20Adminless is ERC20Wrapper, IWLERC20A {
     uint256 public constant VERSION = 1;
 
     address public admin;
-    bool public isLosslessOn = true;
     ILssController public lossless;
 
     constructor(
@@ -26,16 +25,12 @@ contract LosslessWrappedERC20Adminless is ERC20Wrapper, IWLERC20A {
     // --- LOSSLESS modifiers ---
 
     modifier lssAprove(address spender, uint256 amount) {
-        if (isLosslessOn) {
-            lossless.beforeApprove(_msgSender(), spender, amount);
-        }
+        lossless.beforeApprove(_msgSender(), spender, amount);
         _;
     }
 
     modifier lssTransfer(address recipient, uint256 amount) {
-        if (isLosslessOn) {
-            lossless.beforeTransfer(_msgSender(), recipient, amount);
-        }
+        lossless.beforeTransfer(_msgSender(), recipient, amount);
         _;
     }
 
@@ -44,32 +39,21 @@ contract LosslessWrappedERC20Adminless is ERC20Wrapper, IWLERC20A {
         address recipient,
         uint256 amount
     ) {
-        if (isLosslessOn) {
-            lossless.beforeTransferFrom(
-                _msgSender(),
-                sender,
-                recipient,
-                amount
-            );
-        }
+        lossless.beforeTransferFrom(_msgSender(), sender, recipient, amount);
         _;
     }
 
     modifier lssIncreaseAllowance(address spender, uint256 addedValue) {
-        if (isLosslessOn) {
-            lossless.beforeIncreaseAllowance(_msgSender(), spender, addedValue);
-        }
+        lossless.beforeIncreaseAllowance(_msgSender(), spender, addedValue);
         _;
     }
 
     modifier lssDecreaseAllowance(address spender, uint256 subtractedValue) {
-        if (isLosslessOn) {
-            lossless.beforeDecreaseAllowance(
-                _msgSender(),
-                spender,
-                subtractedValue
-            );
-        }
+        lossless.beforeDecreaseAllowance(
+            _msgSender(),
+            spender,
+            subtractedValue
+        );
         _;
     }
 
@@ -82,7 +66,6 @@ contract LosslessWrappedERC20Adminless is ERC20Wrapper, IWLERC20A {
         external
         override
     {
-        require(isLosslessOn, "LSS: Lossless not active");
         require(
             _msgSender() == address(lossless),
             "LERC20: Only lossless contract"
