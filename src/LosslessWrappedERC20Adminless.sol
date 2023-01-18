@@ -10,6 +10,7 @@ contract LosslessWrappedERC20Adminless is ERC20Wrapper, IWLERC20A {
     uint256 public constant VERSION = 1;
 
     address public admin;
+
     ILssController public lossless;
 
     constructor(

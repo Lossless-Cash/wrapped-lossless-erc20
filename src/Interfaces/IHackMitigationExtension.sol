@@ -1,15 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.4;
 
-import "wLERC20/Interfaces/ILosslessTransfersExtension.sol";
-import "wLERC20/Interfaces/ILosslessMintExtension.sol";
-import "wLERC20/Interfaces/ILosslessBurnExtension.sol";
-
-interface IHackMitigationExtension is
-    ILosslessTransferExtension,
-    ILosslessBurnExtension,
-    ILosslessMintExtension
-{
+interface IHackMitigationExtension {
     function supportsInterface(bytes4 interfaceId) external view returns (bool);
 
     function transferOutBlacklistedFunds(address[] calldata _from) external;

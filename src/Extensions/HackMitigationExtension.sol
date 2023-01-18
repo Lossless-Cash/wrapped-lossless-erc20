@@ -5,13 +5,24 @@ pragma solidity ^0.8.0;
 import "openzeppelin/contracts/utils/introspection/IERC165.sol";
 import "openzeppelin/contracts/utils/introspection/ERC165Checker.sol";
 import "openzeppelin/contracts/token/ERC20/ERC20.sol";
+
 import "lossless-v3/Interfaces/ILosslessController.sol";
+
 import "wLERC20/Interfaces/IHackMitigationExtension.sol";
-import "wLERC20/Interfaces/ILosslessExtensibleWrappedERC20.sol";
+import "wLERC20/Interfaces/ILosslessWrappedExtensibleERC20.sol";
+
+import "WERC20e/Interfaces/ITransfersExtension.sol";
+import "WERC20e/Interfaces/IBurnExtension.sol";
+import "WERC20e/Interfaces/IMintExtension.sol";
 
 /// @title Lossless Core Extension for Extendable Wrapped ERC20s
 /// @notice This extension adds Lossless Core protocol to the wrapped token
-contract HackMitigationExtension is IHackMitigationExtension {
+contract HackMitigationExtension is
+    IHackMitigationExtension,
+    ITransferExtension,
+    IBurnExtension,
+    IMintExtension
+{
     uint256 public constant VERSION = 1;
 
     address public recoveryAdmin;
@@ -21,7 +32,7 @@ contract HackMitigationExtension is IHackMitigationExtension {
     uint256 public timelockPeriod;
     uint256 public losslessTurnOffTimestamp;
     bool public isLosslessOn = true;
-    ILosslessExtensibleWrappedERC20 public protectedToken;
+    ILosslessWrappedExtensibleERC20 public protectedToken;
     ILssController public lossless;
 
     /// @notice This function is for checking if the contract allows an interface
@@ -29,7 +40,7 @@ contract HackMitigationExtension is IHackMitigationExtension {
     /// @return true if the interface id is accepted
     function supportsInterface(bytes4 interfaceId)
         public
-        view
+        pure
         override
         returns (bool)
     {
@@ -40,10 +51,10 @@ contract HackMitigationExtension is IHackMitigationExtension {
         address recoveryAdmin_,
         uint256 timelockPeriod_,
         address lossless_,
-        ILosslessExtensibleWrappedERC20 protectedToken_
+        ILosslessWrappedExtensibleERC20 protectedToken_
     ) {
         protectedToken = protectedToken_;
-        admin = ILosslessExtensibleWrappedERC20(protectedToken_).admin();
+        admin = ILosslessWrappedExtensibleERC20(protectedToken_).admin();
         recoveryAdmin = recoveryAdmin_;
         recoveryAdminCandidate = address(0);
         recoveryAdminKeyHash = "";
@@ -220,16 +231,16 @@ contract HackMitigationExtension is IHackMitigationExtension {
         require(
             ERC165Checker.supportsInterface(
                 creator,
-                type(ILosslessExtensibleWrappedERC20).interfaceId
+                type(IExtensibleWrappedERC20).interfaceId
             ),
             "LSS: Creator must implement IERC20WrappedCore"
         );
-        ILosslessExtensibleWrappedERC20(creator).setBeforeTransferExtension();
-        ILosslessExtensibleWrappedERC20(creator)
+        ILosslessWrappedExtensibleERC20(creator).setBeforeTransferExtension();
+        ILosslessWrappedExtensibleERC20(creator)
             .setBeforeTransferFromExtension();
-        ILosslessExtensibleWrappedERC20(creator).setBeforeMintExtension();
-        ILosslessExtensibleWrappedERC20(creator).setBeforeBurnExtension();
-        ILosslessExtensibleWrappedERC20(creator).setBeforeBurnFromExtension();
+        ILosslessWrappedExtensibleERC20(creator).setBeforeMintExtension();
+        ILosslessWrappedExtensibleERC20(creator).setBeforeBurnExtension();
+        ILosslessWrappedExtensibleERC20(creator).setBeforeBurnFromExtension();
     }
 
     /// @notice This function executes the lossless controller before transfer

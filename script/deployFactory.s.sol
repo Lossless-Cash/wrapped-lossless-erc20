@@ -5,12 +5,10 @@ import "forge-std/Script.sol";
 import "../src/LosslessWrappingFactory.sol";
 
 contract DeployFactory is Script {
-    function run() external {
+    function run() external returns (WrappedLosslessFactory) {
         uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
-        vm.startBroadcast(deployerPrivateKey);
+        vm.broadcast(deployerPrivateKey);
 
-        WrappedLosslessFactory factory = new WrappedLosslessFactory();
-
-        vm.stopBroadcast();
+        return new WrappedLosslessFactory();
     }
 }

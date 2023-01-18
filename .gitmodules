@@ -13,3 +13,6 @@
 [submodule "lib/lossless-v3"]
 	path = lib/lossless-v3
 	url = https://github.com/Lossless-Cash/lossless-v3
+[submodule "lib/extensible-wrapped-erc20"]
+	path = lib/extensible-wrapped-erc20
+	url = https://github.com/Lossless-Cash/extensible-wrapped-erc20
