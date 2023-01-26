@@ -20,7 +20,8 @@ contract DeployWrappedERC20 is Script {
                 admin,
                 admin,
                 24 hours,
-                losslessController
+                losslessController,
+                3 hours
             );
 
         vm.stopBroadcast();

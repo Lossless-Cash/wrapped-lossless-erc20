@@ -12,6 +12,7 @@ contract WrappedLosslessFactory {
         address recoveryAdmin_,
         uint256 timelockPeriod_,
         address lossless_,
+        uint256 unwrappingDelay_,
         bool hasAdmin,
         bool isExtensible
     ) public returns (address) {
@@ -27,7 +28,8 @@ contract WrappedLosslessFactory {
                     _token,
                     name,
                     symbol,
-                    msg.sender
+                    msg.sender,
+                    unwrappingDelay_
                 );
 
             return address(newWrappedToken);
@@ -40,7 +42,8 @@ contract WrappedLosslessFactory {
                         admin_,
                         recoveryAdmin_,
                         timelockPeriod_,
-                        lossless_
+                        lossless_,
+                        unwrappingDelay_
                     );
 
                 return address(newWrappedToken);
@@ -49,7 +52,8 @@ contract WrappedLosslessFactory {
                         _token,
                         name,
                         symbol,
-                        lossless_
+                        lossless_,
+                        unwrappingDelay_
                     );
                 return address(newWrappedToken);
             }

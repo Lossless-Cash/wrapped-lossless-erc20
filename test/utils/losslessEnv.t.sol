@@ -50,6 +50,8 @@ contract LosslessTestEnvironment is Test {
     WrappedLosslessFactory public losslessFactory;
     LosslessCoreExtension public coreExtension;
 
+    uint256 unwrappingDelay = 3 hours;
+
     address public dex = address(1099);
 
     address[] public whitelist = [address(this)];
@@ -136,6 +138,7 @@ contract LosslessTestEnvironment is Test {
                 tokenOwner,
                 1 hours,
                 address(lssController),
+                unwrappingDelay,
                 true,
                 true
             )
@@ -164,6 +167,7 @@ contract LosslessTestEnvironment is Test {
                 tokenOwner,
                 1 hours,
                 address(lssController),
+                unwrappingDelay,
                 true,
                 false
             )
@@ -203,6 +207,7 @@ contract LosslessTestEnvironment is Test {
                 tokenOwner,
                 1 hours,
                 address(lssController),
+                unwrappingDelay,
                 false,
                 false
             )
@@ -539,6 +544,7 @@ contract LosslessTestEnvironment is Test {
                 tokenOwner,
                 1 hours,
                 address(lssController),
+                unwrappingDelay,
                 true,
                 true
             )

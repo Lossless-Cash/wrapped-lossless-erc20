@@ -16,13 +16,25 @@ contract LosslessWrappedERC20Extensible is
     uint256 public constant VERSION = 1;
     address public admin;
 
+    uint256 unwrappingDelay;
+
+    struct Unwrapping {
+        bool hasRequest;
+        uint256 unwrappingTimestamp;
+        uint256 unwrappingAmount;
+    }
+
+    mapping(address => Unwrapping) private unwrappingRequests;
+
     constructor(
         IERC20 _underlyingToken,
         string memory _name,
         string memory _symbol,
-        address _admin
+        address _admin,
+        uint256 _unwrappingDelay
     ) ERC20(_name, _symbol) ERC20Wrapper(_underlyingToken) {
         admin = _admin;
+        unwrappingDelay = _unwrappingDelay;
     }
 
     modifier onlyAdmin() {
@@ -120,5 +132,42 @@ contract LosslessWrappedERC20Extensible is
 
     function _burn(address account, uint256 amount) internal override(ERC20) {
         super._burn(account, amount);
+    }
+
+    function requestWithdraw(uint256 amount) public {
+        Unwrapping storage unwrapping = unwrappingRequests[msg.sender];
+
+        require(unwrapping.hasRequest == false, "LSS: Request already set");
+
+        unwrapping.unwrappingAmount = amount;
+        unwrapping.unwrappingTimestamp = block.timestamp + unwrappingDelay;
+        unwrapping.hasRequest = true;
+    }
+
+    function withdrawTo(address account, uint256 amount)
+        public
+        virtual
+        override
+        returns (bool)
+    {
+        Unwrapping storage unwrapping = unwrappingRequests[msg.sender];
+
+        require(unwrapping.hasRequest == true, "LSS: No request in place");
+
+        require(
+            block.timestamp >= unwrapping.unwrappingTimestamp,
+            "LSS: Unwrapping not ready yet"
+        );
+        require(
+            amount <= unwrapping.unwrappingAmount,
+            "LSS: Amount exceed requested amount"
+        );
+
+        unwrapping.hasRequest = false;
+
+        _burn(_msgSender(), amount);
+        SafeERC20.safeTransfer(underlying, account, amount);
+
+        return true;
     }
 }
