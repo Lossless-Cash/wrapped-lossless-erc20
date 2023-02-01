@@ -17,7 +17,7 @@ import "wLERC20/LosslessWrappedERC20Extensible.sol";
 import "wLERC20/LosslessWrappedERC20.sol";
 import "wLERC20/LosslessWrappedERC20Adminless.sol";
 import "wLERC20/LosslessWrappingFactory.sol";
-import "wLERC20/Extensions/LosslessCoreExtension.sol";
+import "wLERC20/Extensions/HackMitigationExtension.sol";
 
 import "forge-std/Test.sol";
 
@@ -45,10 +45,10 @@ contract LosslessTestEnvironment is Test {
     TestToken public adminlessTestERC20;
 
     LosslessWrappedERC20Extensible public wLERC20e;
-    LosslessWrappedERC20Protected public wLERC20p;
-    LosslessWrappedERC20ProtectedAdminless public wLERC20a;
+    LosslessWrappedERC20 public wLERC20p;
+    LosslessWrappedERC20Adminless public wLERC20a;
     WrappedLosslessFactory public losslessFactory;
-    LosslessCoreExtension public coreExtension;
+    HackMitigationExtension public coreExtension;
 
     uint256 unwrappingDelay = 3 hours;
 
@@ -160,7 +160,7 @@ contract LosslessTestEnvironment is Test {
     }
     modifier withProtectedWrappedToken() {
         vm.startPrank(tokenOwner);
-        wLERC20p = LosslessWrappedERC20Protected(
+        wLERC20p = LosslessWrappedERC20(
             losslessFactory.registerWrappedToken(
                 testERC20,
                 tokenOwner,
@@ -200,7 +200,7 @@ contract LosslessTestEnvironment is Test {
 
     modifier withAdminlessProtectedWrappedToken() {
         vm.startPrank(tokenOwner);
-        wLERC20a = LosslessWrappedERC20ProtectedAdminless(
+        wLERC20a = LosslessWrappedERC20Adminless(
             losslessFactory.registerWrappedToken(
                 adminlessTestERC20,
                 tokenOwner,
@@ -558,20 +558,20 @@ contract LosslessTestEnvironment is Test {
             (testERC20.balanceOf(tokenOwner) / 5) - 100
         );
 
-        coreExtension = new LosslessCoreExtension(
+        coreExtension = new HackMitigationExtension(
             tokenOwner,
             settlementTimelock,
             address(lssController),
-            wLERC20e
+            ILosslessWrappedExtensibleERC20(address(wLERC20e))
         );
 
         wLERC20e.registerExtension(address(coreExtension));
+        coreExtension.setHackMitigationExtension(address(wLERC20e));
+        wLERC20e.setHackMitigationExtension(address(coreExtension));
 
         address[] memory extensions = wLERC20e.getExtensions();
 
         assertEq(extensions[0], address(coreExtension));
-
-        coreExtension.setLosslessCoreExtension(address(wLERC20e));
 
         lssController.proposeNewSettlementPeriod(
             ILERC20(address(coreExtension)),
@@ -585,7 +585,6 @@ contract LosslessTestEnvironment is Test {
         );
 
         assertEq(wLERC20e.beforeTransferBase(), address(coreExtension));
-        assertEq(wLERC20e.losslessCoreExtension(), address(coreExtension));
 
         vm.stopPrank();
     }

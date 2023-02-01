@@ -35,20 +35,19 @@ contract WrappedLosslessFactory {
             return address(newWrappedToken);
         } else {
             if (hasAdmin) {
-                LosslessWrappedERC20Protected newWrappedToken = new LosslessWrappedERC20Protected(
-                        _token,
-                        name,
-                        symbol,
-                        admin_,
-                        recoveryAdmin_,
-                        timelockPeriod_,
-                        lossless_,
-                        unwrappingDelay_
-                    );
+                LosslessWrappedERC20 newWrappedToken = new LosslessWrappedERC20(
+                    _token,
+                    name,
+                    symbol,
+                    admin_,
+                    recoveryAdmin_,
+                    timelockPeriod_,
+                    lossless_
+                );
 
                 return address(newWrappedToken);
             } else {
-                LosslessWrappedERC20ProtectedAdminless newWrappedToken = new LosslessWrappedERC20ProtectedAdminless(
+                LosslessWrappedERC20Adminless newWrappedToken = new LosslessWrappedERC20Adminless(
                         _token,
                         name,
                         symbol,

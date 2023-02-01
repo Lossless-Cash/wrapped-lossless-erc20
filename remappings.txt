@@ -1,6 +1,7 @@
 ds-test/=lib/forge-std/lib/ds-test/src/
 forge-std/=lib/forge-std/src/
 lossless-v3/=lib/lossless-v3/contracts/
+WERC20e/=lib/extensible-wrapped-erc20/src/
 openzeppelin-upgradeable/=lib/openzeppelin-contracts-upgradeable/
 openzeppelin/=lib/openzeppelin-contracts/
 wLERC20/=src/

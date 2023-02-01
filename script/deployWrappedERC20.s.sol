@@ -5,7 +5,7 @@ import "forge-std/Script.sol";
 import "../src/LosslessWrappedERC20.sol";
 
 contract DeployWrappedERC20 is Script {
-    function run() external {
+    function run() external returns (LosslessWrappedERC20) {
         uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
         address underlyingToken = 0xA6492ceD95e07A6Bef76F182377c896F3cf3e29b;
         address admin = 0x06F2075587fa961E4Bf7e9c01c5c8EFf69C52837;
@@ -13,7 +13,8 @@ contract DeployWrappedERC20 is Script {
 
         vm.startBroadcast(deployerPrivateKey);
 
-        LosslessWrappedERC20Protected protectedWrapped = new LosslessWrappedERC20Protected(
+        return
+            new LosslessWrappedERC20(
                 IERC20(underlyingToken),
                 "Test Wrapped",
                 "wlTST",
@@ -23,7 +24,5 @@ contract DeployWrappedERC20 is Script {
                 losslessController,
                 3 hours
             );
-
-        vm.stopBroadcast();
     }
 }

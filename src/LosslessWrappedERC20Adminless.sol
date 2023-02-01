@@ -6,12 +6,11 @@ import "openzeppelin/contracts/token/ERC20/extensions/ERC20Wrapper.sol";
 import "lossless-v3/Interfaces/ILosslessController.sol";
 import "./Interfaces/ILosslessWrappedERC20Adminless.sol";
 
-contract LosslessWrappedERC20ProtectedAdminless is ERC20Wrapper, IWLERC20A {
+contract LosslessWrappedERC20Adminless is ERC20Wrapper, IWLERC20A {
     uint256 public constant VERSION = 1;
 
-    address public recoveryAdmin;
     address public admin;
-    bool public isLosslessOn = true;
+
     ILssController public lossless;
 
     uint256 unwrappingDelay;
@@ -32,7 +31,6 @@ contract LosslessWrappedERC20ProtectedAdminless is ERC20Wrapper, IWLERC20A {
         uint256 _unwrappingDelay
     ) ERC20(_name, _symbol) ERC20Wrapper(_underlyingToken) {
         admin = address(this);
-        recoveryAdmin = address(this);
         lossless = ILssController(lossless_);
         unwrappingDelay = _unwrappingDelay;
     }
@@ -40,16 +38,12 @@ contract LosslessWrappedERC20ProtectedAdminless is ERC20Wrapper, IWLERC20A {
     // --- LOSSLESS modifiers ---
 
     modifier lssAprove(address spender, uint256 amount) {
-        if (isLosslessOn) {
-            lossless.beforeApprove(_msgSender(), spender, amount);
-        }
+        lossless.beforeApprove(_msgSender(), spender, amount);
         _;
     }
 
     modifier lssTransfer(address recipient, uint256 amount) {
-        if (isLosslessOn) {
-            lossless.beforeTransfer(_msgSender(), recipient, amount);
-        }
+        lossless.beforeTransfer(_msgSender(), recipient, amount);
         _;
     }
 
@@ -58,32 +52,21 @@ contract LosslessWrappedERC20ProtectedAdminless is ERC20Wrapper, IWLERC20A {
         address recipient,
         uint256 amount
     ) {
-        if (isLosslessOn) {
-            lossless.beforeTransferFrom(
-                _msgSender(),
-                sender,
-                recipient,
-                amount
-            );
-        }
+        lossless.beforeTransferFrom(_msgSender(), sender, recipient, amount);
         _;
     }
 
     modifier lssIncreaseAllowance(address spender, uint256 addedValue) {
-        if (isLosslessOn) {
-            lossless.beforeIncreaseAllowance(_msgSender(), spender, addedValue);
-        }
+        lossless.beforeIncreaseAllowance(_msgSender(), spender, addedValue);
         _;
     }
 
     modifier lssDecreaseAllowance(address spender, uint256 subtractedValue) {
-        if (isLosslessOn) {
-            lossless.beforeDecreaseAllowance(
-                _msgSender(),
-                spender,
-                subtractedValue
-            );
-        }
+        lossless.beforeDecreaseAllowance(
+            _msgSender(),
+            spender,
+            subtractedValue
+        );
         _;
     }
 
@@ -96,7 +79,6 @@ contract LosslessWrappedERC20ProtectedAdminless is ERC20Wrapper, IWLERC20A {
         external
         override
     {
-        require(isLosslessOn, "LSS: Lossless not active");
         require(
             _msgSender() == address(lossless),
             "LERC20: Only lossless contract"
@@ -106,7 +88,6 @@ contract LosslessWrappedERC20ProtectedAdminless is ERC20Wrapper, IWLERC20A {
 
         for (uint256 i = 0; i < fromLength; ) {
             uint256 fromBalance = balanceOf(from[i]);
-            _approve(from[i], address(this), fromBalance);
             _transfer(from[i], address(lossless), fromBalance);
             unchecked {
                 i++;

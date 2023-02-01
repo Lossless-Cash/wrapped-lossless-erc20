@@ -8,12 +8,21 @@ import "openzeppelin/contracts/token/ERC20/ERC20.sol";
 
 import "lossless-v3/Interfaces/ILosslessController.sol";
 
-import "wLERC20/Interfaces/ILosslessCoreExtension.sol";
-import "wLERC20/Interfaces/ILosslessExtensibleWrappedERC20.sol";
+import "wLERC20/Interfaces/IHackMitigationExtension.sol";
+import "wLERC20/Interfaces/ILosslessWrappedExtensibleERC20.sol";
+
+import "WERC20e/Interfaces/ITransfersExtension.sol";
+import "WERC20e/Interfaces/IBurnExtension.sol";
+import "WERC20e/Interfaces/IMintExtension.sol";
 
 /// @title Lossless Core Extension for Extendable Wrapped ERC20s
 /// @notice This extension adds Lossless Core protocol to the wrapped token
-contract LosslessCoreExtension is ILosslessCoreExtension {
+contract HackMitigationExtension is
+    IHackMitigationExtension,
+    ITransferExtension,
+    IBurnExtension,
+    IMintExtension
+{
     uint256 public constant VERSION = 1;
 
     address public recoveryAdmin;
@@ -23,7 +32,7 @@ contract LosslessCoreExtension is ILosslessCoreExtension {
     uint256 public timelockPeriod;
     uint256 public losslessTurnOffTimestamp;
     bool public isLosslessOn = true;
-    ILosslessExtensibleWrappedERC20 public protectedToken;
+    ILosslessWrappedExtensibleERC20 public protectedToken;
     ILssController public lossless;
 
     /// @notice This function is for checking if the contract allows an interface
@@ -31,21 +40,21 @@ contract LosslessCoreExtension is ILosslessCoreExtension {
     /// @return true if the interface id is accepted
     function supportsInterface(bytes4 interfaceId)
         public
-        view
+        pure
         override
         returns (bool)
     {
-        return interfaceId == type(ILosslessCoreExtension).interfaceId;
+        return interfaceId == type(IHackMitigationExtension).interfaceId;
     }
 
     constructor(
         address recoveryAdmin_,
         uint256 timelockPeriod_,
         address lossless_,
-        ILosslessExtensibleWrappedERC20 protectedToken_
+        ILosslessWrappedExtensibleERC20 protectedToken_
     ) {
         protectedToken = protectedToken_;
-        admin = ILosslessExtensibleWrappedERC20(protectedToken_).admin();
+        admin = ILosslessWrappedExtensibleERC20(protectedToken_).admin();
         recoveryAdmin = recoveryAdmin_;
         recoveryAdminCandidate = address(0);
         recoveryAdminKeyHash = "";
@@ -215,19 +224,23 @@ contract LosslessCoreExtension is ILosslessCoreExtension {
     /// @notice This function will set the lossless core extension and the transfer base
     /// @dev This can only be called by the recovery admin
     /// @param creator underlying token address
-    function setLosslessCoreExtension(address creator)
+    function setHackMitigationExtension(address creator)
         external
         onlyRecoveryAdmin
     {
         require(
             ERC165Checker.supportsInterface(
                 creator,
-                type(ILosslessExtensibleWrappedERC20).interfaceId
+                type(IExtensibleWrappedERC20).interfaceId
             ),
             "LSS: Creator must implement IERC20WrappedCore"
         );
-        ILosslessExtensibleWrappedERC20(creator).setLosslessCoreExtension();
-        ILosslessExtensibleWrappedERC20(creator).setBeforeTransferExtension();
+        ILosslessWrappedExtensibleERC20(creator).setBeforeTransferExtension();
+        ILosslessWrappedExtensibleERC20(creator)
+            .setBeforeTransferFromExtension();
+        ILosslessWrappedExtensibleERC20(creator).setBeforeMintExtension();
+        ILosslessWrappedExtensibleERC20(creator).setBeforeBurnExtension();
+        ILosslessWrappedExtensibleERC20(creator).setBeforeBurnFromExtension();
     }
 
     /// @notice This function executes the lossless controller before transfer
@@ -257,18 +270,62 @@ contract LosslessCoreExtension is ILosslessCoreExtension {
         }
     }
 
+    /// @notice This function executes the lossless controller before mint
+    /// @param recipient recipient address
+    /// @param amount amount to transfer
+    function extensionBeforeMint(address recipient, uint256 amount) external {
+        if (isLosslessOn) {
+            lossless.beforeMint(recipient, amount);
+        }
+    }
+
+    /// @notice This function executes the lossless controller before mint
+    /// @param recipient recipient address
+    /// @param amount amount to transfer
+    function extensionBeforeBurn(address recipient, uint256 amount) external {
+        if (isLosslessOn) {
+            lossless.beforeBurn(recipient, amount);
+        }
+    }
+
     function balanceOf(address _adr) public returns (uint256) {
         return ERC20(address(protectedToken)).balanceOf(_adr);
     }
 
-    function extensionAfterTransfer(address recipient, uint256 amount)
-        external
-        override
-    {}
+    function extensionAfterTransfer(
+        address from,
+        address recipient,
+        uint256 amount
+    ) external {}
 
     function extensionAfterTransferFrom(
         address sender,
         address recipient,
         uint256 amount
     ) external override {}
+
+    function extensionAfterMint(address recipient, uint256 amount)
+        external
+        override
+    {}
+
+    function extensionAfterMintFrom(address recipient, uint256 amount)
+        external
+        override
+    {}
+
+    function extensionBeforeMintFrom(address recipient, uint256 amount)
+        external
+        override
+    {}
+
+    function extensionAfterBurn(address recipient, uint256 amount) external {}
+
+    function extensionAfterBurnFrom(address recipient, uint256 amount)
+        external
+    {}
+
+    function extensionBeforeBurnFrom(address recipient, uint256 amount)
+        external
+    {}
 }
