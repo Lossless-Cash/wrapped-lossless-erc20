@@ -17,7 +17,8 @@ contract DeployAdminless is Script {
                 IERC20(underlyingToken),
                 "Test Adminless",
                 "wLTSTe",
-                losslessController
+                losslessController,
+                3 hours
             );
     }
 }

@@ -17,7 +17,8 @@ contract DeployExtensible is Script {
                 IERC20(underlyingToken),
                 "Test Extensible",
                 "wLTSTe",
-                admin
+                admin,
+                3 hours
             );
     }
 }

@@ -14,6 +14,16 @@ import "./Interfaces/IHackMitigationExtension.sol";
 contract LosslessWrappedERC20Extensible is WrappedERC20Extensible {
     address public hackMitigationExtension;
 
+    uint256 unwrappingDelay;
+
+    struct Unwrapping {
+        bool hasRequest;
+        uint256 unwrappingTimestamp;
+        uint256 unwrappingAmount;
+    }
+
+    mapping(address => Unwrapping) private unwrappingRequests;
+
     constructor(
         IERC20 _underlyingToken,
         string memory _name,
@@ -72,5 +82,42 @@ contract LosslessWrappedERC20Extensible is WrappedERC20Extensible {
     function setHackMitigationExtension(address _adr) public onlyAdmin {
         hackMitigationExtension = _adr;
         emit HackMitigationExtensionRegistered(_adr);
+    }
+
+    function requestWithdraw(uint256 amount) public {
+        Unwrapping storage unwrapping = unwrappingRequests[msg.sender];
+
+        require(unwrapping.hasRequest == false, "LSS: Request already set");
+
+        unwrapping.unwrappingAmount = amount;
+        unwrapping.unwrappingTimestamp = block.timestamp + unwrappingDelay;
+        unwrapping.hasRequest = true;
+    }
+
+    function withdrawTo(address account, uint256 amount)
+        public
+        virtual
+        override
+        returns (bool)
+    {
+        Unwrapping storage unwrapping = unwrappingRequests[msg.sender];
+
+        require(unwrapping.hasRequest == true, "LSS: No request in place");
+
+        require(
+            block.timestamp >= unwrapping.unwrappingTimestamp,
+            "LSS: Unwrapping not ready yet"
+        );
+        require(
+            amount <= unwrapping.unwrappingAmount,
+            "LSS: Amount exceed requested amount"
+        );
+
+        unwrapping.hasRequest = false;
+
+        _burn(_msgSender(), amount);
+        SafeERC20.safeTransfer(underlying, account, amount);
+
+        return true;
     }
 }

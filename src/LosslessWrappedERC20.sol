@@ -20,6 +20,16 @@ contract LosslessWrappedERC20 is ERC20Wrapper, IWLERC20 {
     bool public isLosslessOn = true;
     ILssController public lossless;
 
+    uint256 unwrappingDelay;
+
+    struct Unwrapping {
+        bool hasRequest;
+        uint256 unwrappingTimestamp;
+        uint256 unwrappingAmount;
+    }
+
+    mapping(address => Unwrapping) private unwrappingRequests;
+
     constructor(
         IERC20 _underlyingToken,
         string memory _name,
@@ -27,7 +37,8 @@ contract LosslessWrappedERC20 is ERC20Wrapper, IWLERC20 {
         address admin_,
         address recoveryAdmin_,
         uint256 timelockPeriod_,
-        address lossless_
+        address lossless_,
+        uint256 _unwrappingDelay
     ) ERC20(_name, _symbol) ERC20Wrapper(_underlyingToken) {
         admin = admin_;
         recoveryAdmin = recoveryAdmin_;
@@ -36,6 +47,7 @@ contract LosslessWrappedERC20 is ERC20Wrapper, IWLERC20 {
         timelockPeriod = timelockPeriod_;
         losslessTurnOffTimestamp = 0;
         lossless = ILssController(lossless_);
+        unwrappingDelay = _unwrappingDelay;
     }
 
     // --- LOSSLESS modifiers ---
@@ -304,6 +316,43 @@ contract LosslessWrappedERC20 is ERC20Wrapper, IWLERC20 {
             "LERC20: decreased allowance below zero"
         );
         _approve(_msgSender(), spender, currentAllowance - subtractedValue);
+
+        return true;
+    }
+
+    function requestWithdraw(uint256 amount) public {
+        Unwrapping storage unwrapping = unwrappingRequests[msg.sender];
+
+        require(unwrapping.hasRequest == false, "LSS: Request already set");
+
+        unwrapping.unwrappingAmount = amount;
+        unwrapping.unwrappingTimestamp = block.timestamp + unwrappingDelay;
+        unwrapping.hasRequest = true;
+    }
+
+    function withdrawTo(address account, uint256 amount)
+        public
+        virtual
+        override
+        returns (bool)
+    {
+        Unwrapping storage unwrapping = unwrappingRequests[msg.sender];
+
+        require(unwrapping.hasRequest == true, "LSS: No request in place");
+
+        require(
+            block.timestamp >= unwrapping.unwrappingTimestamp,
+            "LSS: Unwrapping not ready yet"
+        );
+        require(
+            amount <= unwrapping.unwrappingAmount,
+            "LSS: Amount exceed requested amount"
+        );
+
+        unwrapping.hasRequest = false;
+
+        _burn(_msgSender(), amount);
+        SafeERC20.safeTransfer(underlying, account, amount);
 
         return true;
     }
