@@ -28,8 +28,11 @@ contract LosslessWrappedERC20Extensible is WrappedERC20Extensible {
         IERC20 _underlyingToken,
         string memory _name,
         string memory _symbol,
-        address _admin
-    ) WrappedERC20Extensible(_underlyingToken, _name, _symbol, _admin) {}
+        address _admin,
+        uint256 _unwrappingDelay
+    ) WrappedERC20Extensible(_underlyingToken, _name, _symbol, _admin) {
+        unwrappingDelay = _unwrappingDelay;
+    }
 
     event HackMitigationExtensionRegistered(address hackExtensionAddress);
 

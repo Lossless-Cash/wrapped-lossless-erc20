@@ -42,7 +42,8 @@ contract WrappedLosslessFactory {
                     admin_,
                     recoveryAdmin_,
                     timelockPeriod_,
-                    lossless_
+                    lossless_,
+                    unwrappingDelay_
                 );
 
                 return address(newWrappedToken);
