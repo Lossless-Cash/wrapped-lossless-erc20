@@ -20,7 +20,7 @@ contract DeployExtensible is Script {
                 admin,
                 24 hours,
                 losslessController,
-                ILosslessWrappedExtensibleERC20(underlyingToken)
+                underlyingToken
             );
     }
 }

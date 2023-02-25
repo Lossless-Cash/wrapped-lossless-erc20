@@ -16,7 +16,6 @@ import "wLERC20/Mocks/ERC20OwnableMock.sol";
 import "wLERC20/LosslessWrappedERC20Extensible.sol";
 import "wLERC20/LosslessWrappedERC20.sol";
 import "wLERC20/LosslessWrappedERC20Adminless.sol";
-import "wLERC20/LosslessWrappingFactory.sol";
 import "wLERC20/Extensions/HackMitigationExtension.sol";
 
 import "forge-std/Test.sol";
@@ -47,7 +46,6 @@ contract LosslessTestEnvironment is Test {
     LosslessWrappedERC20Extensible public wLERC20e;
     LosslessWrappedERC20 public wLERC20p;
     LosslessWrappedERC20Adminless public wLERC20a;
-    WrappedLosslessFactory public losslessFactory;
     HackMitigationExtension public coreExtension;
 
     uint256 unwrappingDelay = 3 hours;
@@ -122,26 +120,18 @@ contract LosslessTestEnvironment is Test {
 
         // Set up Controller
         configureControllerVars();
-
-        // Deploy Lossless Factory
-        deployLosslessFactory();
     }
 
     /// ----- Helpers ------
 
     modifier withExtensibleWrappedToken() {
         vm.startPrank(tokenOwner);
-        wLERC20e = LosslessWrappedERC20Extensible(
-            losslessFactory.registerWrappedToken(
-                testERC20,
-                tokenOwner,
-                tokenOwner,
-                1 hours,
-                address(lssController),
-                unwrappingDelay,
-                true,
-                true
-            )
+        wLERC20e = new LosslessWrappedERC20Extensible(
+            testERC20,
+            "Wrapped extensible TEST",
+            "wLTESTe",
+            tokenOwner,
+            unwrappingDelay
         );
 
         assertEq(wLERC20e.symbol(), "wLTESTe");
@@ -160,17 +150,15 @@ contract LosslessTestEnvironment is Test {
     }
     modifier withProtectedWrappedToken() {
         vm.startPrank(tokenOwner);
-        wLERC20p = LosslessWrappedERC20(
-            losslessFactory.registerWrappedToken(
-                testERC20,
-                tokenOwner,
-                tokenOwner,
-                1 hours,
-                address(lssController),
-                unwrappingDelay,
-                true,
-                false
-            )
+        wLERC20p = new LosslessWrappedERC20(
+            testERC20,
+            "Lossless Wrapped TEST",
+            "wLTEST",
+            tokenOwner,
+            tokenOwner,
+            1 hours,
+            address(lssController),
+            unwrappingDelay
         );
 
         assertEq(wLERC20p.symbol(), "wLTEST");
@@ -200,17 +188,12 @@ contract LosslessTestEnvironment is Test {
 
     modifier withAdminlessProtectedWrappedToken() {
         vm.startPrank(tokenOwner);
-        wLERC20a = LosslessWrappedERC20Adminless(
-            losslessFactory.registerWrappedToken(
-                adminlessTestERC20,
-                tokenOwner,
-                tokenOwner,
-                1 hours,
-                address(lssController),
-                unwrappingDelay,
-                false,
-                false
-            )
+        wLERC20a = new LosslessWrappedERC20Adminless(
+            adminlessTestERC20,
+            "Adminless Lossless Wrapped TEST",
+            "wLTEST",
+            address(lssController),
+            unwrappingDelay
         );
 
         assertEq(wLERC20a.symbol(), "wLTEST");
@@ -393,11 +376,6 @@ contract LosslessTestEnvironment is Test {
         lssController.setSettlementTimeLock(settlementTimelock);
     }
 
-    /// @notice Deploy Lossless Factory
-    function deployLosslessFactory() public {
-        losslessFactory = new WrappedLosslessFactory();
-    }
-
     /// @notice Generate a report
     function generateReport(
         address reportedToken,
@@ -537,17 +515,13 @@ contract LosslessTestEnvironment is Test {
 
     function setUpCoreExtensionTests() public {
         vm.startPrank(tokenOwner);
-        wLERC20e = LosslessWrappedERC20Extensible(
-            losslessFactory.registerWrappedToken(
-                testERC20,
-                tokenOwner,
-                tokenOwner,
-                1 hours,
-                address(lssController),
-                unwrappingDelay,
-                true,
-                true
-            )
+
+        wLERC20e = new LosslessWrappedERC20Extensible(
+            testERC20,
+            "Wrapped extensible TEST",
+            "wLTESTe",
+            tokenOwner,
+            unwrappingDelay
         );
 
         assertEq(wLERC20e.symbol(), "wLTESTe");
@@ -562,11 +536,11 @@ contract LosslessTestEnvironment is Test {
             tokenOwner,
             settlementTimelock,
             address(lssController),
-            ILosslessWrappedExtensibleERC20(address(wLERC20e))
+            address(wLERC20e)
         );
 
         wLERC20e.registerExtension(address(coreExtension));
-        coreExtension.setHackMitigationExtension(address(wLERC20e));
+        coreExtension.setHackMitigationExtension();
         wLERC20e.setHackMitigationExtension(address(coreExtension));
 
         address[] memory extensions = wLERC20e.getExtensions();
