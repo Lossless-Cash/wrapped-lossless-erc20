@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.0;
 
-import "openzeppelin/contracts/proxy/transparent/ProxyAdmin.sol";
-import "openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
+import "@openzeppelin/contracts/proxy/transparent/ProxyAdmin.sol";
+import "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 
 import "lossless-v3/utils/LERC20.sol";
 import "lossless-v3/utils/LosslessControllerV1.sol";
@@ -11,12 +11,12 @@ import "lossless-v3/LosslessGovernance.sol";
 import "lossless-v3/LosslessReporting.sol";
 import "lossless-v3/LosslessStaking.sol";
 
-import "wLERC20/Mocks/ERC20Mock.sol";
-import "wLERC20/Mocks/ERC20OwnableMock.sol";
-import "wLERC20/LosslessWrappedERC20Extensible.sol";
-import "wLERC20/LosslessWrappedERC20.sol";
-import "wLERC20/LosslessWrappedERC20Adminless.sol";
-import "wLERC20/Extensions/HackMitigationExtension.sol";
+import "../../src/Mocks/ERC20Mock.sol";
+import "../../src/Mocks/ERC20OwnableMock.sol";
+import "../../src/LosslessWrappedERC20Extensible.sol";
+import "../../src/LosslessWrappedERC20.sol";
+import "../../src/LosslessWrappedERC20Adminless.sol";
+import "../../src/Extensions/HackMitigationExtension.sol";
 
 import "forge-std/Test.sol";
 

@@ -2,19 +2,19 @@
 
 pragma solidity ^0.8.0;
 
-import "openzeppelin/contracts/utils/introspection/IERC165.sol";
-import "openzeppelin/contracts/utils/introspection/ERC165Checker.sol";
-import "openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts/utils/introspection/IERC165.sol";
+import "@openzeppelin/contracts/utils/introspection/ERC165Checker.sol";
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
 import "lossless-v3/Interfaces/ILosslessController.sol";
 
-import "wLERC20/Interfaces/IHackMitigationExtension.sol";
-import "wLERC20/Interfaces/ILosslessWrappedExtensibleERC20.sol";
+import "../Interfaces/IHackMitigationExtension.sol";
+import "../Interfaces/ILosslessWrappedExtensibleERC20.sol";
 
-import "WERC20e/Interfaces/ITransferExtension.sol";
-import "WERC20e/Interfaces/IBurnExtension.sol";
-import "WERC20e/Interfaces/IMintExtension.sol";
-import "WERC20e/Interfaces/IExtensionCore.sol";
+import "extensible-wrapped-erc20/Interfaces/ITransferExtension.sol";
+import "extensible-wrapped-erc20/Interfaces/IBurnExtension.sol";
+import "extensible-wrapped-erc20/Interfaces/IMintExtension.sol";
+import "extensible-wrapped-erc20/Interfaces/IExtensionCore.sol";
 
 /// @title Lossless Core Extension for Extendable Wrapped ERC20s
 /// @notice This extension adds Lossless Core protocol to the wrapped token

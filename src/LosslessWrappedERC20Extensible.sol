@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.4;
 
-import "openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "openzeppelin/contracts/token/ERC20/extensions/ERC20Wrapper.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Wrapper.sol";
 
-import "WERC20e/ExtensibleWrappedERC20.sol";
-import "WERC20e/Interfaces/IBurnExtension.sol";
-import "WERC20e/Interfaces/ITransferExtension.sol";
-import "WERC20e/Interfaces/IMintExtension.sol";
+import "extensible-wrapped-erc20/ExtensibleWrappedERC20.sol";
+import "extensible-wrapped-erc20/Interfaces/IBurnExtension.sol";
+import "extensible-wrapped-erc20/Interfaces/ITransferExtension.sol";
+import "extensible-wrapped-erc20/Interfaces/IMintExtension.sol";
 
 import "./Interfaces/IHackMitigationExtension.sol";
 
