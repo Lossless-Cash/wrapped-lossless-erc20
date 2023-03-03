@@ -20,7 +20,8 @@ contract LosslessWrappedERC20 is ERC20Wrapper, IWLERC20 {
     bool public isLosslessOn = true;
     ILssController public lossless;
 
-    uint256 unwrappingDelay;
+    uint256 unwrappingDelay;        // Should be marked public?
+                                    // Also I think admin should be able to change this.
 
     struct Unwrapping {
         bool hasRequest;
@@ -28,7 +29,7 @@ contract LosslessWrappedERC20 is ERC20Wrapper, IWLERC20 {
         uint256 unwrappingAmount;
     }
 
-    mapping(address => Unwrapping) private unwrappingRequests;
+    mapping(address => Unwrapping) private unwrappingRequests;          // Maybe would be better to make this public to make life easier for off-chain systems?
 
     constructor(
         IERC20 _underlyingToken,
@@ -320,15 +321,22 @@ contract LosslessWrappedERC20 is ERC20Wrapper, IWLERC20 {
         return true;
     }
 
+
+    // This doesn't solve the problem of hacker stealling the fund
+    // 1) I can request max(uint256)
+    // 2) Wait for the unwrappingDelay
+    // 3) Do the hack
+    // 4) And immediatelly unwrap
+    // We have to allow requesting to unwrap only the amount tha user really currently has
     function requestWithdraw(uint256 amount) public {
-        Unwrapping storage unwrapping = unwrappingRequests[msg.sender];
+        Unwrapping storage unwrapping = unwrappingRequests[msg.sender];             // We usually use _msgSender() for this
 
-        require(unwrapping.hasRequest == false, "LSS: Request already set");
-
+        require(unwrapping.hasRequest == false, "LSS: Request already set");       // I believe it's okay allowing user to overwrite his previous request
+                                                                                    // this require can be removed
         unwrapping.unwrappingAmount = amount;
         unwrapping.unwrappingTimestamp = block.timestamp + unwrappingDelay;
-        unwrapping.hasRequest = true;
-    }
+        unwrapping.hasRequest = true;                                               // This variable can be remove and we can just check unwrappingAmount != 0 
+    } // There should be event emitted about this
 
     function withdrawTo(address account, uint256 amount)
         public
@@ -336,9 +344,9 @@ contract LosslessWrappedERC20 is ERC20Wrapper, IWLERC20 {
         override
         returns (bool)
     {
-        Unwrapping storage unwrapping = unwrappingRequests[msg.sender];
+        Unwrapping storage unwrapping = unwrappingRequests[msg.sender];             // We usually use _msgSender() for this
 
-        require(unwrapping.hasRequest == true, "LSS: No request in place");
+        require(unwrapping.hasRequest == true, "LSS: No request in place");         // no need for this amount <= unwrapping.unwrappingAmount already checks that there's a pending unwrap
 
         require(
             block.timestamp >= unwrapping.unwrappingTimestamp,
@@ -349,11 +357,14 @@ contract LosslessWrappedERC20 is ERC20Wrapper, IWLERC20 {
             "LSS: Amount exceed requested amount"
         );
 
-        unwrapping.hasRequest = false;
+        unwrapping.hasRequest = false;          // remove
 
         _burn(_msgSender(), amount);
         SafeERC20.safeTransfer(underlying, account, amount);
 
+        // Here we should: unwrappingAmount = unwrappingAmount - amount
+        // This would enable better UX
+
         return true;
-    }
+    }   // There should be event emitted about this
 }

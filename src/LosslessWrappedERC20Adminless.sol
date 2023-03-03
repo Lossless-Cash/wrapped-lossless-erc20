@@ -6,6 +6,9 @@ import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Wrapper.sol";
 import "lossless-v3/Interfaces/ILosslessController.sol";
 import "./Interfaces/ILosslessWrappedERC20Adminless.sol";
 
+
+// This has some same issues that are in LosslessWrappedERC20.sol
+// Not gonna repeat it
 contract LosslessWrappedERC20Adminless is ERC20Wrapper, IWLERC20A {
     uint256 public constant VERSION = 1;
 
@@ -192,6 +195,9 @@ contract LosslessWrappedERC20Adminless is ERC20Wrapper, IWLERC20A {
 
         return true;
     }
+
+    // withdraw logic should be moved to separate contract and all the contract should inherit from it
+    // This way we can prevent copy pasting this in each contract
 
     function requestWithdraw(uint256 amount) public {
         Unwrapping storage unwrapping = unwrappingRequests[msg.sender];
