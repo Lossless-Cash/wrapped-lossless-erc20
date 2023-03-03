@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.4;
 
-import "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "lib/openzeppelin-contracts-upgradeable/contracts/utils/ContextUpgradeable.sol";
+import "lib/openzeppelin-contracts-upgradeable/contracts/security/PausableUpgradeable.sol";
+import "lib/openzeppelin-contracts-upgradeable/contracts/proxy/utils/Initializable.sol";
 
 contract LosslessControllerV1 is Initializable, ContextUpgradeable, PausableUpgradeable {
     address public pauseAdmin;

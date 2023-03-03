@@ -2,27 +2,23 @@
 
 pragma solidity ^0.8.0;
 
-import "openzeppelin/contracts/utils/introspection/IERC165.sol";
-import "openzeppelin/contracts/utils/introspection/ERC165Checker.sol";
-import "openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts/utils/introspection/IERC165.sol";
+import "@openzeppelin/contracts/utils/introspection/ERC165Checker.sol";
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
 import "lossless-v3/Interfaces/ILosslessController.sol";
 
-import "wLERC20/Interfaces/IHackMitigationExtension.sol";
-import "wLERC20/Interfaces/ILosslessWrappedExtensibleERC20.sol";
+import "../Interfaces/IHackMitigationExtension.sol";
+import "../Interfaces/ILosslessWrappedExtensibleERC20.sol";
 
-import "WERC20e/Interfaces/ITransfersExtension.sol";
-import "WERC20e/Interfaces/IBurnExtension.sol";
-import "WERC20e/Interfaces/IMintExtension.sol";
+import "extensible-wrapped-erc20/Interfaces/ITransferExtension.sol";
+import "extensible-wrapped-erc20/Interfaces/IBurnExtension.sol";
+import "extensible-wrapped-erc20/Interfaces/IMintExtension.sol";
+import "extensible-wrapped-erc20/Interfaces/IExtensionCore.sol";
 
 /// @title Lossless Core Extension for Extendable Wrapped ERC20s
 /// @notice This extension adds Lossless Core protocol to the wrapped token
-contract HackMitigationExtension is
-    IHackMitigationExtension,
-    ITransferExtension,
-    IBurnExtension,
-    IMintExtension
-{
+contract HackMitigationExtension is IHackMitigationExtension {
     uint256 public constant VERSION = 1;
 
     address public recoveryAdmin;
@@ -32,7 +28,7 @@ contract HackMitigationExtension is
     uint256 public timelockPeriod;
     uint256 public losslessTurnOffTimestamp;
     bool public isLosslessOn = true;
-    ILosslessWrappedExtensibleERC20 public protectedToken;
+    address public protectedToken;
     ILssController public lossless;
 
     /// @notice This function is for checking if the contract allows an interface
@@ -51,7 +47,7 @@ contract HackMitigationExtension is
         address recoveryAdmin_,
         uint256 timelockPeriod_,
         address lossless_,
-        ILosslessWrappedExtensibleERC20 protectedToken_
+        address protectedToken_
     ) {
         protectedToken = protectedToken_;
         admin = ILosslessWrappedExtensibleERC20(protectedToken_).admin();
@@ -223,24 +219,20 @@ contract HackMitigationExtension is
 
     /// @notice This function will set the lossless core extension and the transfer base
     /// @dev This can only be called by the recovery admin
-    /// @param creator underlying token address
-    function setHackMitigationExtension(address creator)
-        external
-        onlyRecoveryAdmin
-    {
+    function setHackMitigationExtension() external onlyRecoveryAdmin {
         require(
             ERC165Checker.supportsInterface(
-                creator,
+                protectedToken,
                 type(IExtensibleWrappedERC20).interfaceId
             ),
             "LSS: Creator must implement IERC20WrappedCore"
         );
-        ILosslessWrappedExtensibleERC20(creator).setBeforeTransferExtension();
-        ILosslessWrappedExtensibleERC20(creator)
-            .setBeforeTransferFromExtension();
-        ILosslessWrappedExtensibleERC20(creator).setBeforeMintExtension();
-        ILosslessWrappedExtensibleERC20(creator).setBeforeBurnExtension();
-        ILosslessWrappedExtensibleERC20(creator).setBeforeBurnFromExtension();
+
+        ICoreExtension(protectedToken).setBeforeTransferExtension();
+        ICoreExtension(protectedToken).setBeforeTransferFromExtension();
+        ICoreExtension(protectedToken).setBeforeMintExtension();
+        ICoreExtension(protectedToken).setBeforeBurnExtension();
+        ICoreExtension(protectedToken).setBeforeBurnFromExtension();
     }
 
     /// @notice This function executes the lossless controller before transfer
@@ -250,7 +242,7 @@ contract HackMitigationExtension is
         address sender,
         address recipient,
         uint256 amount
-    ) external override {
+    ) external {
         if (isLosslessOn) {
             lossless.beforeTransfer(sender, recipient, amount);
         }
@@ -264,7 +256,7 @@ contract HackMitigationExtension is
         address sender,
         address recipient,
         uint256 amount
-    ) external override {
+    ) external {
         if (isLosslessOn) {
             lossless.beforeTransfer(sender, recipient, amount);
         }
@@ -288,44 +280,7 @@ contract HackMitigationExtension is
         }
     }
 
-    function balanceOf(address _adr) public returns (uint256) {
+    function balanceOf(address _adr) public view returns (uint256) {
         return ERC20(address(protectedToken)).balanceOf(_adr);
     }
-
-    function extensionAfterTransfer(
-        address from,
-        address recipient,
-        uint256 amount
-    ) external {}
-
-    function extensionAfterTransferFrom(
-        address sender,
-        address recipient,
-        uint256 amount
-    ) external override {}
-
-    function extensionAfterMint(address recipient, uint256 amount)
-        external
-        override
-    {}
-
-    function extensionAfterMintFrom(address recipient, uint256 amount)
-        external
-        override
-    {}
-
-    function extensionBeforeMintFrom(address recipient, uint256 amount)
-        external
-        override
-    {}
-
-    function extensionAfterBurn(address recipient, uint256 amount) external {}
-
-    function extensionAfterBurnFrom(address recipient, uint256 amount)
-        external
-    {}
-
-    function extensionBeforeBurnFrom(address recipient, uint256 amount)
-        external
-    {}
 }

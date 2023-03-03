@@ -15,4 +15,7 @@
 	url = https://github.com/Lossless-Cash/lossless-v3
 [submodule "lib/extensible-wrapped-erc20"]
 	path = lib/extensible-wrapped-erc20
-	url = https://github.com/Lossless-Cash/extensible-wrapped-erc20
+	url = git@github.com:Lossless-Cash/extensible-wrapped-erc20.git
+[submodule "lib/aegis-core-smart-contracts"]
+	path = lib/aegis-core-smart-contracts
+	url = https://github.com/Lossless-Cash/aegis-core-smart-contracts

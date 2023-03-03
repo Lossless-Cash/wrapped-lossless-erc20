@@ -1,18 +1,19 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.4;
 
-import "openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "openzeppelin/contracts/token/ERC20/extensions/ERC20Wrapper.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Wrapper.sol";
 
-import "WERC20e/ExtensibleWrappedERC20.sol";
-import "WERC20e/Interfaces/IBurnExtension.sol";
-import "WERC20e/Interfaces/ITransfersExtension.sol";
-import "WERC20e/Interfaces/IMintExtension.sol";
+import "extensible-wrapped-erc20/ExtensibleWrappedERC20.sol";
+import "extensible-wrapped-erc20/Interfaces/IBurnExtension.sol";
+import "extensible-wrapped-erc20/Interfaces/ITransferExtension.sol";
+import "extensible-wrapped-erc20/Interfaces/IMintExtension.sol";
 
 import "./Interfaces/IHackMitigationExtension.sol";
 
 contract LosslessWrappedERC20Extensible is WrappedERC20Extensible {
     address public hackMitigationExtension;
+    address public admin;
 
     uint256 unwrappingDelay;
 
@@ -30,11 +31,17 @@ contract LosslessWrappedERC20Extensible is WrappedERC20Extensible {
         string memory _symbol,
         address _admin,
         uint256 _unwrappingDelay
-    ) WrappedERC20Extensible(_underlyingToken, _name, _symbol, _admin) {
+    ) WrappedERC20Extensible(_underlyingToken, _name, _symbol) {
         unwrappingDelay = _unwrappingDelay;
+        admin = _admin;
     }
 
     event HackMitigationExtensionRegistered(address hackExtensionAddress);
+
+    modifier onlyAdmin() {
+        require(msg.sender == admin, "LSS: Only admin");
+        _;
+    }
 
     /// @notice Determines whether the contract implements the given interface.
     /// @param interfaceId The interface identifier to check.
