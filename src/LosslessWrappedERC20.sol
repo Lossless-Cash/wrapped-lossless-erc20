@@ -20,8 +20,7 @@ contract LosslessWrappedERC20 is ERC20Wrapper, IWLERC20 {
     bool public isLosslessOn = true;
     ILssController public lossless;
 
-    uint256 unwrappingDelay;        // Should be marked public?
-                                    // Also I think admin should be able to change this.
+    uint256 public unwrappingDelay;
 
     struct Unwrapping {
         bool hasRequest;
@@ -29,7 +28,7 @@ contract LosslessWrappedERC20 is ERC20Wrapper, IWLERC20 {
         uint256 unwrappingAmount;
     }
 
-    mapping(address => Unwrapping) private unwrappingRequests;          // Maybe would be better to make this public to make life easier for off-chain systems?
+    mapping(address => Unwrapping) public unwrappingRequests;
 
     constructor(
         IERC20 _underlyingToken,
@@ -112,10 +111,9 @@ contract LosslessWrappedERC20 is ERC20Wrapper, IWLERC20 {
     // --- LOSSLESS management ---
     /// @notice This function is for transfering out funds when a report is solved positively
     /// @param from blacklisted address
-    function transferOutBlacklistedFunds(address[] calldata from)
-        external
-        override
-    {
+    function transferOutBlacklistedFunds(
+        address[] calldata from
+    ) external override {
         require(isLosslessOn, "LSS: Lossless not active");
         require(
             _msgSender() == address(lossless),
@@ -136,25 +134,31 @@ contract LosslessWrappedERC20 is ERC20Wrapper, IWLERC20 {
     /// @notice This function is for setting the admin that interacts with lossless protocol
     /// @dev Only can be called by recovery admin
     /// @param newAdmin new admin address
-    function setLosslessAdmin(address newAdmin)
-        external
-        override
-        onlyRecoveryAdmin
-    {
+    function setLosslessAdmin(
+        address newAdmin
+    ) external override onlyRecoveryAdmin {
         require(newAdmin != admin, "LERC20: Cannot set same address");
         emit NewAdmin(newAdmin);
         admin = newAdmin;
+    }
+
+    /// @notice This function is for setting the unwrapping delay of the tokens
+    /// @dev Only can be called by recovery admin
+    /// @param _unwrappingDelay new admin address
+    function setUnwrappingDelay(
+        uint256 _unwrappingDelay
+    ) external onlyRecoveryAdmin {
+        unwrappingDelay = _unwrappingDelay;
     }
 
     /// @notice This function is for transfering the recovery admin role
     /// @dev Only can be called by recovery admin
     /// @param candidate New recovery admin address
     /// @param keyHash Key hash to accept transfer
-    function transferRecoveryAdminOwnership(address candidate, bytes32 keyHash)
-        external
-        override
-        onlyRecoveryAdmin
-    {
+    function transferRecoveryAdminOwnership(
+        address candidate,
+        bytes32 keyHash
+    ) external override onlyRecoveryAdmin {
         recoveryAdminCandidate = candidate;
         recoveryAdminKeyHash = keyHash;
         emit NewRecoveryAdminProposal(candidate);
@@ -220,7 +224,10 @@ contract LosslessWrappedERC20 is ERC20Wrapper, IWLERC20 {
     /// @param recipient receiver address
     /// @param amount amount to transfer
     /// @return bool true if the transfer was successful
-    function transfer(address recipient, uint256 amount)
+    function transfer(
+        address recipient,
+        uint256 amount
+    )
         public
         virtual
         override(ERC20)
@@ -237,13 +244,10 @@ contract LosslessWrappedERC20 is ERC20Wrapper, IWLERC20 {
     /// @param spender sender address
     /// @param amount amount to transfer
     /// @return bool true if the transfer was approved successfully
-    function approve(address spender, uint256 amount)
-        public
-        virtual
-        override(ERC20)
-        lssAprove(spender, amount)
-        returns (bool)
-    {
+    function approve(
+        address spender,
+        uint256 amount
+    ) public virtual override(ERC20) lssAprove(spender, amount) returns (bool) {
         _approve(_msgSender(), spender, amount);
         return true;
     }
@@ -283,7 +287,10 @@ contract LosslessWrappedERC20 is ERC20Wrapper, IWLERC20 {
     /// @param spender sender address
     /// @param addedValue amount to increase allowance
     /// @return bool true if the allwance increase was successful
-    function increaseAllowance(address spender, uint256 addedValue)
+    function increaseAllowance(
+        address spender,
+        uint256 addedValue
+    )
         public
         virtual
         override(ERC20)
@@ -304,7 +311,10 @@ contract LosslessWrappedERC20 is ERC20Wrapper, IWLERC20 {
     /// @param spender sender address
     /// @param subtractedValue amount to decrease allowance
     /// @return bool true if the allwance decrease was successful
-    function decreaseAllowance(address spender, uint256 subtractedValue)
+    function decreaseAllowance(
+        address spender,
+        uint256 subtractedValue
+    )
         public
         virtual
         override(ERC20)
@@ -321,32 +331,23 @@ contract LosslessWrappedERC20 is ERC20Wrapper, IWLERC20 {
         return true;
     }
 
-
-    // This doesn't solve the problem of hacker stealling the fund
-    // 1) I can request max(uint256)
-    // 2) Wait for the unwrappingDelay
-    // 3) Do the hack
-    // 4) And immediatelly unwrap
-    // We have to allow requesting to unwrap only the amount tha user really currently has
     function requestWithdraw(uint256 amount) public {
-        Unwrapping storage unwrapping = unwrappingRequests[msg.sender];             // We usually use _msgSender() for this
+        require(
+            amount <= balanceOf(_msgSender()),
+            "LSS: Request exceeds balance"
+        );
 
-        require(unwrapping.hasRequest == false, "LSS: Request already set");       // I believe it's okay allowing user to overwrite his previous request
-                                                                                    // this require can be removed
+        Unwrapping storage unwrapping = unwrappingRequests[_msgSender()];
+
         unwrapping.unwrappingAmount = amount;
         unwrapping.unwrappingTimestamp = block.timestamp + unwrappingDelay;
-        unwrapping.hasRequest = true;                                               // This variable can be remove and we can just check unwrappingAmount != 0 
     } // There should be event emitted about this
 
-    function withdrawTo(address account, uint256 amount)
-        public
-        virtual
-        override
-        returns (bool)
-    {
-        Unwrapping storage unwrapping = unwrappingRequests[msg.sender];             // We usually use _msgSender() for this
-
-        require(unwrapping.hasRequest == true, "LSS: No request in place");         // no need for this amount <= unwrapping.unwrappingAmount already checks that there's a pending unwrap
+    function withdrawTo(
+        address account,
+        uint256 amount
+    ) public virtual override returns (bool) {
+        Unwrapping storage unwrapping = unwrappingRequests[_msgSender()];
 
         require(
             block.timestamp >= unwrapping.unwrappingTimestamp,
@@ -357,14 +358,10 @@ contract LosslessWrappedERC20 is ERC20Wrapper, IWLERC20 {
             "LSS: Amount exceed requested amount"
         );
 
-        unwrapping.hasRequest = false;          // remove
-
+        unwrapping.unwrappingAmount = unwrapping.unwrappingAmount - amount;
         _burn(_msgSender(), amount);
         SafeERC20.safeTransfer(underlying, account, amount);
 
-        // Here we should: unwrappingAmount = unwrappingAmount - amount
-        // This would enable better UX
-
         return true;
-    }   // There should be event emitted about this
+    } // There should be event emitted about this
 }

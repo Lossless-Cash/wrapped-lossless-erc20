@@ -77,11 +77,11 @@ contract UnwrappingToken is LosslessTestEnvironment {
         withProtectedWrappedToken
         withAdminlessProtectedWrappedToken
     {
-        vm.expectRevert("LSS: No request in place");
+        vm.expectRevert("LSS: Amount exceed requested amount");
         wLERC20a.withdrawTo(tokenOwner, 10);
-        vm.expectRevert("LSS: No request in place");
+        vm.expectRevert("LSS: Amount exceed requested amount");
         wLERC20p.withdrawTo(tokenOwner, 10);
-        vm.expectRevert("LSS: No request in place");
+        vm.expectRevert("LSS: Amount exceed requested amount");
         wLERC20e.withdrawTo(tokenOwner, 10);
         vm.stopPrank();
     }

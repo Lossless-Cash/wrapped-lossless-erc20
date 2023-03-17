@@ -46,13 +46,9 @@ contract LosslessWrappedERC20Extensible is WrappedERC20Extensible {
     /// @notice Determines whether the contract implements the given interface.
     /// @param interfaceId The interface identifier to check.
     /// @return bool Whether the contract implements the given interface.
-    function supportsInterface(bytes4 interfaceId)
-        public
-        view
-        virtual
-        override(WrappedERC20Extensible)
-        returns (bool)
-    {
+    function supportsInterface(
+        bytes4 interfaceId
+    ) public view virtual override(WrappedERC20Extensible) returns (bool) {
         return
             interfaceId == type(ExtensionCore).interfaceId ||
             super.supportsInterface(interfaceId);
@@ -95,24 +91,22 @@ contract LosslessWrappedERC20Extensible is WrappedERC20Extensible {
     }
 
     function requestWithdraw(uint256 amount) public {
-        Unwrapping storage unwrapping = unwrappingRequests[msg.sender];
+        require(
+            amount <= balanceOf(_msgSender()),
+            "LSS: Request exceeds balance"
+        );
 
-        require(unwrapping.hasRequest == false, "LSS: Request already set");
+        Unwrapping storage unwrapping = unwrappingRequests[_msgSender()];
 
         unwrapping.unwrappingAmount = amount;
         unwrapping.unwrappingTimestamp = block.timestamp + unwrappingDelay;
-        unwrapping.hasRequest = true;
-    }
+    } // There should be event emitted about this
 
-    function withdrawTo(address account, uint256 amount)
-        public
-        virtual
-        override
-        returns (bool)
-    {
-        Unwrapping storage unwrapping = unwrappingRequests[msg.sender];
-
-        require(unwrapping.hasRequest == true, "LSS: No request in place");
+    function withdrawTo(
+        address account,
+        uint256 amount
+    ) public virtual override returns (bool) {
+        Unwrapping storage unwrapping = unwrappingRequests[_msgSender()];
 
         require(
             block.timestamp >= unwrapping.unwrappingTimestamp,
@@ -123,11 +117,10 @@ contract LosslessWrappedERC20Extensible is WrappedERC20Extensible {
             "LSS: Amount exceed requested amount"
         );
 
-        unwrapping.hasRequest = false;
-
+        unwrapping.unwrappingAmount = unwrapping.unwrappingAmount - amount;
         _burn(_msgSender(), amount);
         SafeERC20.safeTransfer(underlying, account, amount);
 
         return true;
-    }
+    } // There should be event emitted about this
 }
