@@ -10,20 +10,14 @@ import "extensible-wrapped-erc20/Interfaces/ITransferExtension.sol";
 import "extensible-wrapped-erc20/Interfaces/IMintExtension.sol";
 
 import "./Interfaces/IHackMitigationExtension.sol";
+import "./Utils/LosslessUnwrapper.sol";
 
-contract LosslessWrappedERC20Extensible is WrappedERC20Extensible {
+contract LosslessWrappedERC20Extensible is
+    WrappedERC20Extensible,
+    LosslessUnwrapper
+{
     address public hackMitigationExtension;
     address public admin;
-
-    uint256 unwrappingDelay;
-
-    struct Unwrapping {
-        bool hasRequest;
-        uint256 unwrappingTimestamp;
-        uint256 unwrappingAmount;
-    }
-
-    mapping(address => Unwrapping) private unwrappingRequests;
 
     constructor(
         IERC20 _underlyingToken,
@@ -31,7 +25,10 @@ contract LosslessWrappedERC20Extensible is WrappedERC20Extensible {
         string memory _symbol,
         address _admin,
         uint256 _unwrappingDelay
-    ) WrappedERC20Extensible(_underlyingToken, _name, _symbol) {
+    )
+        WrappedERC20Extensible(_underlyingToken, _name, _symbol)
+        LosslessUnwrapper(_unwrappingDelay, address(this))
+    {
         unwrappingDelay = _unwrappingDelay;
         admin = _admin;
     }
@@ -90,37 +87,14 @@ contract LosslessWrappedERC20Extensible is WrappedERC20Extensible {
         emit HackMitigationExtensionRegistered(_adr);
     }
 
-    function requestWithdraw(uint256 amount) public {
-        require(
-            amount <= balanceOf(_msgSender()),
-            "LSS: Request exceeds balance"
-        );
-
-        Unwrapping storage unwrapping = unwrappingRequests[_msgSender()];
-
-        unwrapping.unwrappingAmount = amount;
-        unwrapping.unwrappingTimestamp = block.timestamp + unwrappingDelay;
-    } // There should be event emitted about this
-
     function withdrawTo(
         address account,
         uint256 amount
-    ) public virtual override returns (bool) {
-        Unwrapping storage unwrapping = unwrappingRequests[_msgSender()];
-
-        require(
-            block.timestamp >= unwrapping.unwrappingTimestamp,
-            "LSS: Unwrapping not ready yet"
-        );
-        require(
-            amount <= unwrapping.unwrappingAmount,
-            "LSS: Amount exceed requested amount"
-        );
-
-        unwrapping.unwrappingAmount = unwrapping.unwrappingAmount - amount;
-        _burn(_msgSender(), amount);
-        SafeERC20.safeTransfer(underlying, account, amount);
-
-        return true;
-    } // There should be event emitted about this
+    ) public override returns (bool) {
+        if (_unwrap(account, amount)) {
+            _burn(_msgSender(), amount);
+            return true;
+        }
+        return false;
+    }
 }

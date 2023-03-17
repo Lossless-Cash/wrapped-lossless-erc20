@@ -5,10 +5,11 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Wrapper.sol";
 import "lossless-v3/Interfaces/ILosslessController.sol";
 import "./Interfaces/ILosslessWrappedERC20.sol";
+import "./Utils/LosslessUnwrapper.sol";
 
 /// @title Lossless Protected Wrapped ERC20
 /// @notice This contract wraps an ERC20 with Lossless Core Protocol
-contract LosslessWrappedERC20 is ERC20Wrapper, IWLERC20 {
+contract LosslessWrappedERC20 is ERC20Wrapper, IWLERC20, LosslessUnwrapper {
     uint256 public constant VERSION = 1;
 
     address public recoveryAdmin;
@@ -20,16 +21,6 @@ contract LosslessWrappedERC20 is ERC20Wrapper, IWLERC20 {
     bool public isLosslessOn = true;
     ILssController public lossless;
 
-    uint256 public unwrappingDelay;
-
-    struct Unwrapping {
-        bool hasRequest;
-        uint256 unwrappingTimestamp;
-        uint256 unwrappingAmount;
-    }
-
-    mapping(address => Unwrapping) public unwrappingRequests;
-
     constructor(
         IERC20 _underlyingToken,
         string memory _name,
@@ -39,7 +30,11 @@ contract LosslessWrappedERC20 is ERC20Wrapper, IWLERC20 {
         uint256 timelockPeriod_,
         address lossless_,
         uint256 _unwrappingDelay
-    ) ERC20(_name, _symbol) ERC20Wrapper(_underlyingToken) {
+    )
+        ERC20(_name, _symbol)
+        ERC20Wrapper(_underlyingToken)
+        LosslessUnwrapper(_unwrappingDelay, address(this))
+    {
         admin = admin_;
         recoveryAdmin = recoveryAdmin_;
         recoveryAdminCandidate = address(0);
@@ -47,7 +42,6 @@ contract LosslessWrappedERC20 is ERC20Wrapper, IWLERC20 {
         timelockPeriod = timelockPeriod_;
         losslessTurnOffTimestamp = 0;
         lossless = ILssController(lossless_);
-        unwrappingDelay = _unwrappingDelay;
     }
 
     // --- LOSSLESS modifiers ---
@@ -140,15 +134,6 @@ contract LosslessWrappedERC20 is ERC20Wrapper, IWLERC20 {
         require(newAdmin != admin, "LERC20: Cannot set same address");
         emit NewAdmin(newAdmin);
         admin = newAdmin;
-    }
-
-    /// @notice This function is for setting the unwrapping delay of the tokens
-    /// @dev Only can be called by recovery admin
-    /// @param _unwrappingDelay new admin address
-    function setUnwrappingDelay(
-        uint256 _unwrappingDelay
-    ) external onlyRecoveryAdmin {
-        unwrappingDelay = _unwrappingDelay;
     }
 
     /// @notice This function is for transfering the recovery admin role
@@ -331,37 +316,15 @@ contract LosslessWrappedERC20 is ERC20Wrapper, IWLERC20 {
         return true;
     }
 
-    function requestWithdraw(uint256 amount) public {
-        require(
-            amount <= balanceOf(_msgSender()),
-            "LSS: Request exceeds balance"
-        );
-
-        Unwrapping storage unwrapping = unwrappingRequests[_msgSender()];
-
-        unwrapping.unwrappingAmount = amount;
-        unwrapping.unwrappingTimestamp = block.timestamp + unwrappingDelay;
-    } // There should be event emitted about this
-
     function withdrawTo(
         address account,
         uint256 amount
-    ) public virtual override returns (bool) {
-        Unwrapping storage unwrapping = unwrappingRequests[_msgSender()];
+    ) public override returns (bool) {
+        if (_unwrap(account, amount)) {
+            _burn(_msgSender(), amount);
+            return true;
+        }
 
-        require(
-            block.timestamp >= unwrapping.unwrappingTimestamp,
-            "LSS: Unwrapping not ready yet"
-        );
-        require(
-            amount <= unwrapping.unwrappingAmount,
-            "LSS: Amount exceed requested amount"
-        );
-
-        unwrapping.unwrappingAmount = unwrapping.unwrappingAmount - amount;
-        _burn(_msgSender(), amount);
-        SafeERC20.safeTransfer(underlying, account, amount);
-
-        return true;
-    } // There should be event emitted about this
+        return false;
+    }
 }

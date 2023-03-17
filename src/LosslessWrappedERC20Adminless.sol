@@ -5,25 +5,20 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Wrapper.sol";
 import "lossless-v3/Interfaces/ILosslessController.sol";
 import "./Interfaces/ILosslessWrappedERC20Adminless.sol";
+import "./Utils/LosslessUnwrapper.sol";
 
 // This has some same issues that are in LosslessWrappedERC20.sol
 // Not gonna repeat it
-contract LosslessWrappedERC20Adminless is ERC20Wrapper, IWLERC20A {
+contract LosslessWrappedERC20Adminless is
+    ERC20Wrapper,
+    IWLERC20A,
+    LosslessUnwrapper
+{
     uint256 public constant VERSION = 1;
 
     address public admin;
 
     ILssController public lossless;
-
-    uint256 public unwrappingDelay;
-
-    struct Unwrapping {
-        bool hasRequest;
-        uint256 unwrappingTimestamp;
-        uint256 unwrappingAmount;
-    }
-
-    mapping(address => Unwrapping) public unwrappingRequests;
 
     constructor(
         IERC20 _underlyingToken,
@@ -31,10 +26,13 @@ contract LosslessWrappedERC20Adminless is ERC20Wrapper, IWLERC20A {
         string memory _symbol,
         address lossless_,
         uint256 _unwrappingDelay
-    ) ERC20(_name, _symbol) ERC20Wrapper(_underlyingToken) {
+    )
+        ERC20(_name, _symbol)
+        ERC20Wrapper(_underlyingToken)
+        LosslessUnwrapper(_unwrappingDelay, address(this))
+    {
         admin = address(this);
         lossless = ILssController(lossless_);
-        unwrappingDelay = _unwrappingDelay;
     }
 
     // --- LOSSLESS modifiers ---
@@ -200,37 +198,15 @@ contract LosslessWrappedERC20Adminless is ERC20Wrapper, IWLERC20A {
         return true;
     }
 
-    function requestWithdraw(uint256 amount) public {
-        require(
-            amount <= balanceOf(_msgSender()),
-            "LSS: Request exceeds balance"
-        );
-
-        Unwrapping storage unwrapping = unwrappingRequests[_msgSender()];
-
-        unwrapping.unwrappingAmount = amount;
-        unwrapping.unwrappingTimestamp = block.timestamp + unwrappingDelay;
-    } // There should be event emitted about this
-
     function withdrawTo(
         address account,
         uint256 amount
-    ) public virtual override returns (bool) {
-        Unwrapping storage unwrapping = unwrappingRequests[_msgSender()];
+    ) public override returns (bool) {
+        if (_unwrap(account, amount)) {
+            _burn(_msgSender(), amount);
+            return true;
+        }
 
-        require(
-            block.timestamp >= unwrapping.unwrappingTimestamp,
-            "LSS: Unwrapping not ready yet"
-        );
-        require(
-            amount <= unwrapping.unwrappingAmount,
-            "LSS: Amount exceed requested amount"
-        );
-
-        unwrapping.unwrappingAmount = unwrapping.unwrappingAmount - amount;
-        _burn(_msgSender(), amount);
-        SafeERC20.safeTransfer(underlying, account, amount);
-
-        return true;
-    } // There should be event emitted about this
+        return false;
+    }
 }

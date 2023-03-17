@@ -62,11 +62,11 @@ contract UnwrappingToken is LosslessTestEnvironment {
 
         vm.warp(block.timestamp + unwrappingDelay + 1 minutes);
 
-        vm.expectRevert("LSS: Amount exceed requested amount");
+        vm.expectRevert("LSS: Amount exceeds requested amount");
         wLERC20a.withdrawTo(tokenOwner, 11);
-        vm.expectRevert("LSS: Amount exceed requested amount");
+        vm.expectRevert("LSS: Amount exceeds requested amount");
         wLERC20p.withdrawTo(tokenOwner, 11);
-        vm.expectRevert("LSS: Amount exceed requested amount");
+        vm.expectRevert("LSS: Amount exceeds requested amount");
         wLERC20e.withdrawTo(tokenOwner, 11);
         vm.stopPrank();
     }
@@ -77,11 +77,11 @@ contract UnwrappingToken is LosslessTestEnvironment {
         withProtectedWrappedToken
         withAdminlessProtectedWrappedToken
     {
-        vm.expectRevert("LSS: Amount exceed requested amount");
+        vm.expectRevert("LSS: Amount exceeds requested amount");
         wLERC20a.withdrawTo(tokenOwner, 10);
-        vm.expectRevert("LSS: Amount exceed requested amount");
+        vm.expectRevert("LSS: Amount exceeds requested amount");
         wLERC20p.withdrawTo(tokenOwner, 10);
-        vm.expectRevert("LSS: Amount exceed requested amount");
+        vm.expectRevert("LSS: Amount exceeds requested amount");
         wLERC20e.withdrawTo(tokenOwner, 10);
         vm.stopPrank();
     }
