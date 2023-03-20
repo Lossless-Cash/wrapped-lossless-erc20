@@ -4,22 +4,17 @@ pragma solidity ^0.8.4;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Wrapper.sol";
 import "lossless-v3/Interfaces/ILosslessController.sol";
-import "./Interfaces/ILosslessWrappedERC20Adminless.sol";
+
 import "./Utils/LosslessUnwrapper.sol";
+import "./Utils/LosslessBase.sol";
 
 // This has some same issues that are in LosslessWrappedERC20.sol
 // Not gonna repeat it
 contract LosslessWrappedERC20Adminless is
     ERC20Wrapper,
-    IWLERC20A,
-    LosslessUnwrapper
+    LosslessUnwrapper,
+    LosslessBase
 {
-    uint256 public constant VERSION = 1;
-
-    address public admin;
-
-    ILssController public lossless;
-
     constructor(
         IERC20 _underlyingToken,
         string memory _name,
@@ -30,45 +25,8 @@ contract LosslessWrappedERC20Adminless is
         ERC20(_name, _symbol)
         ERC20Wrapper(_underlyingToken)
         LosslessUnwrapper(_unwrappingDelay, address(this))
-    {
-        admin = address(this);
-        lossless = ILssController(lossless_);
-    }
-
-    // --- LOSSLESS modifiers ---
-
-    modifier lssAprove(address spender, uint256 amount) {
-        lossless.beforeApprove(_msgSender(), spender, amount);
-        _;
-    }
-
-    modifier lssTransfer(address recipient, uint256 amount) {
-        lossless.beforeTransfer(_msgSender(), recipient, amount);
-        _;
-    }
-
-    modifier lssTransferFrom(
-        address sender,
-        address recipient,
-        uint256 amount
-    ) {
-        lossless.beforeTransferFrom(_msgSender(), sender, recipient, amount);
-        _;
-    }
-
-    modifier lssIncreaseAllowance(address spender, uint256 addedValue) {
-        lossless.beforeIncreaseAllowance(_msgSender(), spender, addedValue);
-        _;
-    }
-
-    modifier lssDecreaseAllowance(address spender, uint256 subtractedValue) {
-        lossless.beforeDecreaseAllowance(
-            _msgSender(),
-            spender,
-            subtractedValue
-        );
-        _;
-    }
+        LosslessBase(address(this), address(this), 1 minutes, lossless_)
+    {}
 
     // --- LOSSLESS management ---
 

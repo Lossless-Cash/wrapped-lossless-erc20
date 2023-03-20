@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-interface IWLERC20 {
+interface ILosslessBase {
     function transferOutBlacklistedFunds(address[] calldata _from) external;
 
     function setLosslessAdmin(address _newAdmin) external;

@@ -6,8 +6,6 @@ import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Wrapper.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/utils/Context.sol";
 
-import "forge-std/console.sol";
-
 contract LosslessUnwrapper is Context {
     using SafeERC20 for IERC20;
 
