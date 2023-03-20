@@ -9,7 +9,7 @@ import "extensible-wrapped-erc20/Interfaces/IBurnExtension.sol";
 import "extensible-wrapped-erc20/Interfaces/ITransferExtension.sol";
 import "extensible-wrapped-erc20/Interfaces/IMintExtension.sol";
 
-import "./Interfaces/IHackMitigationExtension.sol";
+import "./Extensions/Interfaces/IHackMitigationExtension.sol";
 import "./Utils/LosslessUnwrapper.sol";
 
 contract LosslessWrappedERC20Extensible is

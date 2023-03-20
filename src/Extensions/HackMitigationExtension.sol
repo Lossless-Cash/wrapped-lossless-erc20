@@ -8,7 +8,7 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
 import "lossless-v3/Interfaces/ILosslessController.sol";
 
-import "../Interfaces/IHackMitigationExtension.sol";
+import "../Extensions/Interfaces/IHackMitigationExtension.sol";
 import "../Interfaces/ILosslessWrappedExtensibleERC20.sol";
 
 import "extensible-wrapped-erc20/Interfaces/ITransferExtension.sol";
@@ -34,12 +34,9 @@ contract HackMitigationExtension is IHackMitigationExtension {
     /// @notice This function is for checking if the contract allows an interface
     /// @param interfaceId Interface ID
     /// @return true if the interface id is accepted
-    function supportsInterface(bytes4 interfaceId)
-        public
-        pure
-        override
-        returns (bool)
-    {
+    function supportsInterface(
+        bytes4 interfaceId
+    ) public pure override returns (bool) {
         return interfaceId == type(IHackMitigationExtension).interfaceId;
     }
 
@@ -139,11 +136,9 @@ contract HackMitigationExtension is IHackMitigationExtension {
     /// @notice This function is for setting the admin that interacts with lossless protocol
     /// @dev Only can be called by recovery admin
     /// @param newAdmin new admin address
-    function setLosslessAdmin(address newAdmin)
-        external
-        override
-        onlyRecoveryAdmin
-    {
+    function setLosslessAdmin(
+        address newAdmin
+    ) external override onlyRecoveryAdmin {
         require(newAdmin != admin, "LERC20: Cannot set same address");
         emit NewAdmin(newAdmin);
         admin = newAdmin;
@@ -153,11 +148,10 @@ contract HackMitigationExtension is IHackMitigationExtension {
     /// @dev Only can be called by recovery admin
     /// @param candidate New recovery admin address
     /// @param keyHash Key hash to accept transfer
-    function transferRecoveryAdminOwnership(address candidate, bytes32 keyHash)
-        external
-        override
-        onlyRecoveryAdmin
-    {
+    function transferRecoveryAdminOwnership(
+        address candidate,
+        bytes32 keyHash
+    ) external override onlyRecoveryAdmin {
         recoveryAdminCandidate = candidate;
         recoveryAdminKeyHash = keyHash;
         emit NewRecoveryAdminProposal(candidate);
