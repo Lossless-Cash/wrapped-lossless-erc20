@@ -202,8 +202,8 @@ contract LosslessWrappedERC20Adminless is
         address account,
         uint256 amount
     ) public override returns (bool) {
+        _burn(_msgSender(), amount);
         if (_unwrap(account, amount)) {
-            _burn(_msgSender(), amount);
             return true;
         }
 
