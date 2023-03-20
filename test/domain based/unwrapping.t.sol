@@ -77,6 +77,7 @@ contract UnwrappingToken is LosslessTestEnvironment {
         withProtectedWrappedToken
         withAdminlessProtectedWrappedToken
     {
+        vm.startPrank(tokenOwner);
         vm.expectRevert("LSS: Amount exceeds requested amount");
         wLERC20a.withdrawTo(tokenOwner, 10);
         vm.expectRevert("LSS: Amount exceeds requested amount");
