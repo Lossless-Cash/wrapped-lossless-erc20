@@ -31,9 +31,7 @@ contract LosslessWrappedERC20Adminless is
     /// @notice Transfers the specified accounts' balances to the lossless contract.
     /// @dev Only the lossless contract is allowed to call this function.
     /// @param from An array of addresses whose balances should be transferred.
-    function transferOutBlacklistedFunds(
-        address[] calldata from
-    ) external override {
+    function transferOutBlacklistedFunds(address[] calldata from) external {
         require(
             _msgSender() == address(lossless),
             "LERC20: Only lossless contract"

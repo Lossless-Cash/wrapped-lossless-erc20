@@ -89,17 +89,6 @@ contract LosslessBase is Context, ILosslessBase {
         _;
     }
 
-    // So we don't need this transferOutBlacklistedFunds function here
-
-    // --- LOSSLESS management ---
-    /// @notice This function is for transfering out funds when a report is solved positively
-    /// @param from blacklisted address
-    function transferOutBlacklistedFunds(
-        address[] calldata from
-    ) external virtual {
-        revert("LSS: Must implement function");
-    }
-
     // I don' think we need admin controls in this base contract, cause ERC20Adminless does not use them and they can be just move to the proper token contract
     /// @notice This function is for setting the admin that interacts with lossless protocol
     /// @dev Only can be called by recovery admin

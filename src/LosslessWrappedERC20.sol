@@ -30,9 +30,7 @@ contract LosslessWrappedERC20 is ERC20Wrapper, LosslessUnwrapper, LosslessBase {
     // --- LOSSLESS management ---
     /// @notice This function is for transfering out funds when a report is solved positively
     /// @param from blacklisted address
-    function transferOutBlacklistedFunds(
-        address[] calldata from
-    ) external override {
+    function transferOutBlacklistedFunds(address[] calldata from) external {
         require(isLosslessOn, "LSS: Lossless not active");
         require(
             _msgSender() == address(lossless),
