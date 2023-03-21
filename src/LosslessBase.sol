@@ -4,9 +4,7 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/utils/Context.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "lossless-v3/Interfaces/ILosslessController.sol";
-import "../Interfaces/ILosslessBase.sol";
-
-// I don't think these base contracts should be in /utils folder, let's move them back to /src
+import "./Interfaces/ILosslessBase.sol";
 
 contract LosslessBase is Context, ILosslessBase {
     address public recoveryAdmin;
@@ -91,7 +89,6 @@ contract LosslessBase is Context, ILosslessBase {
         _;
     }
 
-
     // So we don't need this transferOutBlacklistedFunds function here
 
     // --- LOSSLESS management ---
@@ -102,7 +99,6 @@ contract LosslessBase is Context, ILosslessBase {
     ) external virtual {
         revert("LSS: Must implement function");
     }
-
 
     // I don' think we need admin controls in this base contract, cause ERC20Adminless does not use them and they can be just move to the proper token contract
     /// @notice This function is for setting the admin that interacts with lossless protocol

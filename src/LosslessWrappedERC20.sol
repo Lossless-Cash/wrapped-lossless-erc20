@@ -5,8 +5,8 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Wrapper.sol";
 import "lossless-v3/Interfaces/ILosslessController.sol";
 
-import "./Utils/LosslessUnwrapper.sol";
-import "./Utils/LosslessBase.sol";
+import "./LosslessUnwrapper.sol";
+import "./LosslessBase.sol";
 
 /// @title Lossless Protected Wrapped ERC20
 /// @notice This contract wraps an ERC20 with Lossless Core Protocol

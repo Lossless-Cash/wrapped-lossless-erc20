@@ -5,11 +5,9 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Wrapper.sol";
 import "lossless-v3/Interfaces/ILosslessController.sol";
 
-import "./Utils/LosslessUnwrapper.sol";
-import "./Utils/LosslessBase.sol";
+import "./LosslessUnwrapper.sol";
+import "./LosslessBase.sol";
 
-// This has some same issues that are in LosslessWrappedERC20.sol
-// Not gonna repeat it
 contract LosslessWrappedERC20Adminless is
     ERC20Wrapper,
     LosslessUnwrapper,

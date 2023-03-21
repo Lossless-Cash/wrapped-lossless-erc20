@@ -10,7 +10,7 @@ import "extensible-wrapped-erc20/Interfaces/ITransferExtension.sol";
 import "extensible-wrapped-erc20/Interfaces/IMintExtension.sol";
 
 import "./Extensions/Interfaces/IHackMitigationExtension.sol";
-import "./Utils/LosslessUnwrapper.sol";
+import "./LosslessUnwrapper.sol";
 
 // Let's move this contract to extensible repo and use LosslessUnwrapper inside that repo
 
