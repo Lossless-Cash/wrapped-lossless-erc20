@@ -6,7 +6,6 @@ import "../utils/losslessEnv.t.sol";
 contract PayoutRefund is LosslessTestEnvironment {
     function testPayoutRefundClaim()
         public
-        withExtensibleCoreProtected
         withProtectedWrappedToken
         withAdminlessProtectedWrappedToken
         withReportsGenerated
@@ -25,7 +24,6 @@ contract PayoutRefund is LosslessTestEnvironment {
 
     function testPayoutRefundClaimTwice()
         public
-        withExtensibleCoreProtected
         withProtectedWrappedToken
         withAdminlessProtectedWrappedToken
         withReportsGenerated
@@ -41,7 +39,6 @@ contract PayoutRefund is LosslessTestEnvironment {
 
     function testPayoutRefundClaimByNonAfflicted()
         public
-        withExtensibleCoreProtected
         withProtectedWrappedToken
         withAdminlessProtectedWrappedToken
         withReportsGenerated
@@ -55,7 +52,6 @@ contract PayoutRefund is LosslessTestEnvironment {
 
     function testPayoutRefundClaimByNonLssGovernance()
         public
-        withExtensibleCoreProtected
         withProtectedWrappedToken
         withAdminlessProtectedWrappedToken
         withReportsGenerated

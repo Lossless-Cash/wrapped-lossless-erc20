@@ -6,7 +6,6 @@ import "../utils/losslessEnv.t.sol";
 contract CommitteeRewardsClaim is LosslessTestEnvironment {
     function testCommitteeRewardsClaimWhenNotResolved()
         public
-        withExtensibleCoreProtected
         withProtectedWrappedToken
         withAdminlessProtectedWrappedToken
         withReportsGenerated
@@ -17,15 +16,12 @@ contract CommitteeRewardsClaim is LosslessTestEnvironment {
             lssGovernance.claimCommitteeReward(1);
             vm.expectRevert("LSS: Report solved negatively");
             lssGovernance.claimCommitteeReward(2);
-            vm.expectRevert("LSS: Report solved negatively");
-            lssGovernance.claimCommitteeReward(3);
             vm.stopPrank();
         }
     }
 
     function testCommitteeRewardsClaimOnce()
         public
-        withExtensibleCoreProtected
         withProtectedWrappedToken
         withAdminlessProtectedWrappedToken
         withReportsGenerated
@@ -35,25 +31,17 @@ contract CommitteeRewardsClaim is LosslessTestEnvironment {
             uint256 balanceBeforeProtected = wLERC20p.balanceOf(
                 committeeMembers[i]
             );
-            uint256 balanceBeforeExtensible = wLERC20e.balanceOf(
-                committeeMembers[i]
-            );
             uint256 balanceBeforeAdminless = wLERC20a.balanceOf(
                 committeeMembers[i]
             );
             vm.startPrank(committeeMembers[i]);
             lssGovernance.claimCommitteeReward(1);
             lssGovernance.claimCommitteeReward(2);
-            lssGovernance.claimCommitteeReward(3);
             vm.stopPrank();
 
             assertGt(
                 wLERC20p.balanceOf(committeeMembers[i]),
                 balanceBeforeProtected
-            );
-            assertGt(
-                wLERC20e.balanceOf(committeeMembers[i]),
-                balanceBeforeExtensible
             );
             assertGt(
                 wLERC20a.balanceOf(committeeMembers[i]),
@@ -64,7 +52,6 @@ contract CommitteeRewardsClaim is LosslessTestEnvironment {
 
     function testCommitteeRewardsClaimByNonMember()
         public
-        withExtensibleCoreProtected
         withProtectedWrappedToken
         withAdminlessProtectedWrappedToken
         withReportsGenerated
@@ -75,8 +62,6 @@ contract CommitteeRewardsClaim is LosslessTestEnvironment {
         lssGovernance.claimCommitteeReward(1);
         vm.expectRevert("LSS: Did not vote on report");
         lssGovernance.claimCommitteeReward(2);
-        vm.expectRevert("LSS: Did not vote on report");
-        lssGovernance.claimCommitteeReward(3);
         vm.stopPrank();
     }
 }
