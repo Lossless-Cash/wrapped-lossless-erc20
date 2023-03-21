@@ -6,6 +6,8 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "lossless-v3/Interfaces/ILosslessController.sol";
 import "../Interfaces/ILosslessBase.sol";
 
+// I don't think these base contracts should be in /utils folder, let's move them back to /src
+
 contract LosslessBase is Context, ILosslessBase {
     address public recoveryAdmin;
     address private recoveryAdminCandidate;
@@ -89,6 +91,9 @@ contract LosslessBase is Context, ILosslessBase {
         _;
     }
 
+
+    // So we don't need this transferOutBlacklistedFunds function here
+
     // --- LOSSLESS management ---
     /// @notice This function is for transfering out funds when a report is solved positively
     /// @param from blacklisted address
@@ -98,6 +103,8 @@ contract LosslessBase is Context, ILosslessBase {
         revert("LSS: Must implement function");
     }
 
+
+    // I don' think we need admin controls in this base contract, cause ERC20Adminless does not use them and they can be just move to the proper token contract
     /// @notice This function is for setting the admin that interacts with lossless protocol
     /// @dev Only can be called by recovery admin
     /// @param newAdmin new admin address

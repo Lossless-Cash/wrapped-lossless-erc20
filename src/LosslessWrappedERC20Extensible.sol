@@ -12,6 +12,8 @@ import "extensible-wrapped-erc20/Interfaces/IMintExtension.sol";
 import "./Extensions/Interfaces/IHackMitigationExtension.sol";
 import "./Utils/LosslessUnwrapper.sol";
 
+// Let's move this contract to extensible repo and use LosslessUnwrapper inside that repo
+
 contract LosslessWrappedERC20Extensible is
     WrappedERC20Extensible,
     LosslessUnwrapper
