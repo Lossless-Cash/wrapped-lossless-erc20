@@ -11,6 +11,11 @@ import "./LosslessBase.sol";
 /// @title Lossless Protected Wrapped ERC20
 /// @notice This contract wraps an ERC20 with Lossless Core Protocol
 contract LosslessWrappedERC20 is ERC20Wrapper, LosslessUnwrapper, LosslessBase {
+    address public recoveryAdmin;
+    address private recoveryAdminCandidate;
+    bytes32 private recoveryAdminKeyHash;
+    address public admin;
+
     constructor(
         IERC20 _underlyingToken,
         string memory _name,
@@ -23,9 +28,14 @@ contract LosslessWrappedERC20 is ERC20Wrapper, LosslessUnwrapper, LosslessBase {
     )
         ERC20(_name, _symbol)
         ERC20Wrapper(_underlyingToken)
-        LosslessBase(admin_, recoveryAdmin_, timelockPeriod_, lossless_)
+        LosslessBase(timelockPeriod_, lossless_)
         LosslessUnwrapper(_unwrappingDelay, address(this))
-    {}
+    {
+        admin = admin_;
+        recoveryAdmin = recoveryAdmin_;
+        recoveryAdminCandidate = address(0);
+        recoveryAdminKeyHash = "";
+    }
 
     // --- LOSSLESS management ---
     /// @notice This function is for transfering out funds when a report is solved positively
@@ -171,5 +181,84 @@ contract LosslessWrappedERC20 is ERC20Wrapper, LosslessUnwrapper, LosslessBase {
         }
 
         return false;
+    }
+
+    modifier onlyRecoveryAdmin() {
+        require(
+            _msgSender() == recoveryAdmin,
+            "LERC20: Must be recovery admin"
+        );
+        _;
+    }
+
+    // I don' think we need admin controls in this base contract, cause ERC20Adminless does not use them and they can be just move to the proper token contract
+    /// @notice This function is for setting the admin that interacts with lossless protocol
+    /// @dev Only can be called by recovery admin
+    /// @param newAdmin new admin address
+    function setLosslessAdmin(address newAdmin) external onlyRecoveryAdmin {
+        require(newAdmin != admin, "LERC20: Cannot set same address");
+        emit NewAdmin(newAdmin);
+        admin = newAdmin;
+    }
+
+    /// @notice This function is for transfering the recovery admin role
+    /// @dev Only can be called by recovery admin
+    /// @param candidate New recovery admin address
+    /// @param keyHash Key hash to accept transfer
+    function transferRecoveryAdminOwnership(
+        address candidate,
+        bytes32 keyHash
+    ) external onlyRecoveryAdmin {
+        recoveryAdminCandidate = candidate;
+        recoveryAdminKeyHash = keyHash;
+        emit NewRecoveryAdminProposal(candidate);
+    }
+
+    /// @notice This function is for accepting the revoery admin ownership transfer
+    /// @dev Only can be called by recovery admin
+    /// @param key Key hash to accept transfer
+    function acceptRecoveryAdminOwnership(bytes memory key) external {
+        require(
+            _msgSender() == recoveryAdminCandidate,
+            "LERC20: Must be canditate"
+        );
+        require(keccak256(key) == recoveryAdminKeyHash, "LERC20: Invalid key");
+        emit NewRecoveryAdmin(recoveryAdminCandidate);
+        recoveryAdmin = recoveryAdminCandidate;
+        recoveryAdminCandidate = address(0);
+    }
+
+    /// @notice This function is for proposing turning off lossless
+    /// @dev Only can be called by recovery admin
+    function proposeLosslessTurnOff() external onlyRecoveryAdmin {
+        require(
+            losslessTurnOffTimestamp == 0,
+            "LERC20: TurnOff already proposed"
+        );
+        require(isLosslessOn, "LERC20: Lossless already off");
+        losslessTurnOffTimestamp = block.timestamp + timelockPeriod;
+        emit LosslessTurnOffProposal(losslessTurnOffTimestamp);
+    }
+
+    /// @notice This function is for executing the lossless turn off
+    /// @dev Only can be called by recovery admin and after the set period has passed
+    function executeLosslessTurnOff() external onlyRecoveryAdmin {
+        require(losslessTurnOffTimestamp != 0, "LERC20: TurnOff not proposed");
+        require(
+            losslessTurnOffTimestamp <= block.timestamp,
+            "LERC20: Time lock in progress"
+        );
+        isLosslessOn = false;
+        losslessTurnOffTimestamp = 0;
+        emit LosslessOff();
+    }
+
+    /// @notice This function is for turning on lossless
+    /// @dev Only can be called by recovery admin
+    function executeLosslessTurnOn() external onlyRecoveryAdmin {
+        require(!isLosslessOn, "LERC20: Lossless already on");
+        losslessTurnOffTimestamp = 0;
+        isLosslessOn = true;
+        emit LosslessOn();
     }
 }

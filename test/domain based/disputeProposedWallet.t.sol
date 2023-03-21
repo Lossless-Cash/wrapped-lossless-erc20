@@ -46,8 +46,6 @@ contract DisputeProposeWallet is LosslessTestEnvironment {
         withReportsSolvedPositively
     {
         vm.startPrank(tokenOwner);
-        vm.expectRevert("LSS: Role cannot propose");
-        lssGovernance.proposeWallet(1, retrievalReceiver);
         lssGovernance.proposeWallet(2, retrievalReceiver);
         lssGovernance.proposeWallet(3, retrievalReceiver);
         vm.stopPrank();
@@ -62,8 +60,6 @@ contract DisputeProposeWallet is LosslessTestEnvironment {
         withReportsSolvedPositively
     {
         vm.startPrank(address(3001));
-        vm.expectRevert("LSS: Role cannot propose");
-        lssGovernance.proposeWallet(1, retrievalReceiver);
         vm.expectRevert("LSS: Role cannot propose");
         lssGovernance.proposeWallet(2, retrievalReceiver);
         vm.expectRevert("LSS: Role cannot propose");
@@ -125,8 +121,6 @@ contract DisputeProposeWallet is LosslessTestEnvironment {
         lssGovernance.proposeWallet(3, retrievalReceiver);
 
         vm.startPrank(address(3001));
-        vm.expectRevert("LSS: Role cannot reject.");
-        lssGovernance.rejectWallet(1);
         vm.expectRevert("LSS: Role cannot reject.");
         lssGovernance.rejectWallet(2);
         vm.expectRevert("LSS: Role cannot reject.");

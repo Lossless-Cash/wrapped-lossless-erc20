@@ -23,7 +23,7 @@ contract LosslessWrappedERC20Adminless is
         ERC20(_name, _symbol)
         ERC20Wrapper(_underlyingToken)
         LosslessUnwrapper(_unwrappingDelay, address(this))
-        LosslessBase(address(this), address(this), 1 minutes, lossless_)
+        LosslessBase(1 minutes, lossless_)
     {}
 
     // --- LOSSLESS management ---

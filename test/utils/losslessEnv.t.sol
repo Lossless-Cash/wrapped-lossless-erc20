@@ -452,8 +452,11 @@ contract LosslessTestEnvironment is Test {
         (, , , , ILERC20 reportedToken, , ) = lssReporting.getReportInfo(
             reportId
         );
-        vm.prank(reportedToken.admin());
-        lssGovernance.tokenOwnersVote(reportId, adminVote);
+
+        if (address(reportedToken) != address(wLERC20a)) {
+            vm.prank(reportedToken.admin());
+            lssGovernance.tokenOwnersVote(reportId, adminVote);
+        }
 
         lssGovernance.resolveReport(reportId);
     }

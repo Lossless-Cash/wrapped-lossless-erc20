@@ -146,10 +146,6 @@ contract WrappedERC20Test is LosslessTestEnvironment {
         public
         withAdminlessProtectedWrappedToken
     {
-        uint256 participatingMembers = 0;
-        uint256 expectedToRetrieve = reportedAmount -
-            ((reportedAmount * (reporterReward + losslessReward)) / 1e2);
-
         uint256 reportId = generateReport(
             address(wLERC20a),
             maliciousActor,
@@ -157,11 +153,19 @@ contract WrappedERC20Test is LosslessTestEnvironment {
             wLERC20a
         );
 
-        solveReport(reportId, participatingMembers, true, true, true);
+        vm.prank(address(this));
+        lssGovernance.losslessVote(reportId, true);
 
-        (, , uint256 fundsToRetrieve, , , , , , , , ) = lssGovernance
-            .proposedWalletOnReport(reportId);
+        (, , , , ILERC20 reportedToken, , ) = lssReporting.getReportInfo(
+            reportId
+        );
 
-        assertApproxEqAbs(fundsToRetrieve, expectedToRetrieve, 5000);
+        if (address(reportedToken) != address(wLERC20a)) {
+            vm.prank(reportedToken.admin());
+            lssGovernance.tokenOwnersVote(reportId, true);
+        }
+
+        vm.expectRevert("LSS: Not enough votes");
+        lssGovernance.resolveReport(reportId);
     }
 }

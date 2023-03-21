@@ -97,8 +97,6 @@ contract VoteOnReport is LosslessTestEnvironment {
         withReportsGenerated
     {
         vm.startPrank(tokenOwner);
-        vm.expectRevert("LSS: Must be token owner");
-        lssGovernance.tokenOwnersVote(1, true);
         lssGovernance.tokenOwnersVote(2, true);
         lssGovernance.tokenOwnersVote(3, true);
         vm.stopPrank();
@@ -115,13 +113,9 @@ contract VoteOnReport is LosslessTestEnvironment {
         withReportsGenerated
     {
         vm.startPrank(tokenOwner);
-        vm.expectRevert("LSS: Must be token owner");
-        lssGovernance.tokenOwnersVote(1, true);
         lssGovernance.tokenOwnersVote(2, true);
         lssGovernance.tokenOwnersVote(3, true);
 
-        vm.expectRevert("LSS: Must be token owner");
-        lssGovernance.tokenOwnersVote(1, true);
         vm.expectRevert("LSS: owners already voted");
         lssGovernance.tokenOwnersVote(2, true);
         vm.expectRevert("LSS: owners already voted");
