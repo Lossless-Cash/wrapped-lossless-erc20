@@ -195,7 +195,6 @@ contract LosslessWrappedERC20 is ERC20Wrapper, LosslessUnwrapper, LosslessBase {
         _;
     }
 
-    // I don' think we need admin controls in this base contract, cause ERC20Adminless does not use them and they can be just move to the proper token contract
     /// @notice This function is for setting the admin that interacts with lossless protocol
     /// @dev Only can be called by recovery admin
     /// @param newAdmin new admin address
