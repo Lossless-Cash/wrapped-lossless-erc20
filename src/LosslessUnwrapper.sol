@@ -9,7 +9,7 @@ import "@openzeppelin/contracts/utils/Context.sol";
 contract LosslessUnwrapper is Context {
     using SafeERC20 for IERC20;
 
-    uint256 public unwrappingDelay; // There is still no way to change this by admin, need a function for that
+    uint256 public unwrappingDelay;
     ERC20Wrapper public wrappedToken;
 
     struct Unwrapping {

@@ -171,6 +171,10 @@ contract LosslessWrappedERC20 is ERC20Wrapper, LosslessUnwrapper, LosslessBase {
         return true;
     }
 
+    function setUnwrapingDelay(uint256 _newDelay) public onlyRecoveryAdmin {
+        unwrappingDelay = _newDelay;
+    }
+
     function withdrawTo(
         address account,
         uint256 amount
