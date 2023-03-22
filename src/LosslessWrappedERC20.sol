@@ -8,6 +8,9 @@ import "lossless-v3/Interfaces/ILosslessController.sol";
 import "./LosslessUnwrapper.sol";
 import "./LosslessBase.sol";
 
+
+// Couldn't this contract inherit from adminless one? I think almost all function from adminless are here?
+
 /// @title Lossless Protected Wrapped ERC20
 /// @notice This contract wraps an ERC20 with Lossless Core Protocol
 contract LosslessWrappedERC20 is ERC20Wrapper, LosslessUnwrapper, LosslessBase {
