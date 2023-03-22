@@ -1,48 +1,99 @@
-// SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.4;
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
 
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Wrapper.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+
 import "lossless-v3/Interfaces/ILosslessController.sol";
 
-import "./LosslessUnwrapper.sol";
-import "./LosslessBase.sol";
+import "./Interfaces/ILosslessEvents.sol";
 
+contract LosslessWrappedERC20 is ERC20Wrapper, ILosslessEvents {
+    using SafeERC20 for IERC20;
 
-// Couldn't this contract inherit from adminless one? I think almost all function from adminless are here?
+    uint256 public timelockPeriod;
+    uint256 public losslessTurnOffTimestamp;
+    bool public isLosslessOn = true;
+    ILssController public lossless;
 
-/// @title Lossless Protected Wrapped ERC20
-/// @notice This contract wraps an ERC20 with Lossless Core Protocol
-contract LosslessWrappedERC20 is ERC20Wrapper, LosslessUnwrapper, LosslessBase {
-    address public recoveryAdmin;
-    address private recoveryAdminCandidate;
-    bytes32 private recoveryAdminKeyHash;
-    address public admin;
+    uint256 public unwrappingDelay;
+
+    struct Unwrapping {
+        uint256 unwrappingAmount;
+        uint256 unwrappingTimestamp;
+    }
+
+    mapping(address => Unwrapping) public unwrappingRequests;
 
     constructor(
         IERC20 _underlyingToken,
         string memory _name,
         string memory _symbol,
-        address admin_,
-        address recoveryAdmin_,
-        uint256 timelockPeriod_,
         address lossless_,
-        uint256 _unwrappingDelay
-    )
-        ERC20(_name, _symbol)
-        ERC20Wrapper(_underlyingToken)
-        LosslessBase(timelockPeriod_, lossless_)
-        LosslessUnwrapper(_unwrappingDelay, address(this))
-    {
-        admin = admin_;
-        recoveryAdmin = recoveryAdmin_;
-        recoveryAdminCandidate = address(0);
-        recoveryAdminKeyHash = "";
+        uint256 _unwrappingDelay,
+        uint256 timelockPeriod_
+    ) ERC20(_name, _symbol) ERC20Wrapper(_underlyingToken) {
+        timelockPeriod = timelockPeriod_;
+        losslessTurnOffTimestamp = 0;
+        lossless = ILssController(lossless_);
+        unwrappingDelay = _unwrappingDelay;
+    }
+
+    // --- LOSSLESS modifiers ---
+
+    modifier lssAprove(address spender, uint256 amount) {
+        if (isLosslessOn) {
+            lossless.beforeApprove(_msgSender(), spender, amount);
+        }
+        _;
+    }
+
+    modifier lssTransfer(address recipient, uint256 amount) {
+        if (isLosslessOn) {
+            lossless.beforeTransfer(_msgSender(), recipient, amount);
+        }
+        _;
+    }
+
+    modifier lssTransferFrom(
+        address sender,
+        address recipient,
+        uint256 amount
+    ) {
+        if (isLosslessOn) {
+            lossless.beforeTransferFrom(
+                _msgSender(),
+                sender,
+                recipient,
+                amount
+            );
+        }
+        _;
+    }
+
+    modifier lssIncreaseAllowance(address spender, uint256 addedValue) {
+        if (isLosslessOn) {
+            lossless.beforeIncreaseAllowance(_msgSender(), spender, addedValue);
+        }
+        _;
+    }
+
+    modifier lssDecreaseAllowance(address spender, uint256 subtractedValue) {
+        if (isLosslessOn) {
+            lossless.beforeDecreaseAllowance(
+                _msgSender(),
+                spender,
+                subtractedValue
+            );
+        }
+        _;
     }
 
     // --- LOSSLESS management ---
-    /// @notice This function is for transfering out funds when a report is solved positively
-    /// @param from blacklisted address
+
+    /// @notice Transfers the specified accounts' balances to the lossless contract.
+    /// @dev Only the lossless contract is allowed to call this function.
+    /// @param from An array of addresses whose balances should be transferred.
     function transferOutBlacklistedFunds(address[] calldata from) external {
         require(isLosslessOn, "LSS: Lossless not active");
         require(
@@ -61,12 +112,10 @@ contract LosslessWrappedERC20 is ERC20Wrapper, LosslessUnwrapper, LosslessBase {
         }
     }
 
-    /// @notice This function corresponds to the regular transfer
-    /// @dev This will call the lssTransfer modifier which perofrms all the necessary checks
-    ///      with the Lossless controller
-    /// @param recipient receiver address
-    /// @param amount amount to transfer
-    /// @return bool true if the transfer was successful
+    /// @notice Transfers `amount` tokens from the caller's account to `recipient`.
+    /// @param recipient The address to which the tokens should be transferred.
+    /// @param amount The amount of tokens to transfer.
+    /// @return bool Whether the transfer was successful.
     function transfer(
         address recipient,
         uint256 amount
@@ -81,12 +130,10 @@ contract LosslessWrappedERC20 is ERC20Wrapper, LosslessUnwrapper, LosslessBase {
         return true;
     }
 
-    /// @notice This function corresponds to the regular approve
-    /// @dev This will call the lssAprove modifier which perofrms all the necessary checks
-    ///      with the Lossless controller
-    /// @param spender sender address
-    /// @param amount amount to transfer
-    /// @return bool true if the transfer was approved successfully
+    /// @notice Approves `spender` to transfer `amount` tokens from the caller's account.
+    /// @param spender The address of the contract that will be able to transfer the tokens.
+    /// @param amount The amount of tokens that `spender` is approved to transfer.
+    /// @return bool Whether the approval was successful.
     function approve(
         address spender,
         uint256 amount
@@ -95,12 +142,11 @@ contract LosslessWrappedERC20 is ERC20Wrapper, LosslessUnwrapper, LosslessBase {
         return true;
     }
 
-    /// @notice This function corresponds to the regular transferFrom
-    /// @dev This will call the lssTransferFrom modifier which perofrms all the necessary checks
-    ///      with the Lossless controller
-    /// @param sender sender address
-    /// @param recipient receiver address
-    /// @param amount amount to transfer
+    /// @notice Transfers `amount` tokens from `sender` to `recipient` using the caller's allowance.
+    /// @param sender The address of the account whose tokens will be transferred.
+    /// @param recipient The address to which the tokens should be transferred.
+    /// @param amount The amount of tokens to transfer.
+    /// @return bool Whether the transfer was successful.
     function transferFrom(
         address sender,
         address recipient,
@@ -124,12 +170,10 @@ contract LosslessWrappedERC20 is ERC20Wrapper, LosslessUnwrapper, LosslessBase {
         return true;
     }
 
-    /// @notice This function corresponds to the regular increase allowance
-    /// @dev This will call the lssIncreaseAllowance modifier which perofrms all the necessary checks
-    ///      with the Lossless controller
-    /// @param spender sender address
-    /// @param addedValue amount to increase allowance
-    /// @return bool true if the allwance increase was successful
+    /// @notice Increases the caller's allowance to `spender` by `addedValue`.
+    /// @param spender The address of the contract that will be able to transfer the tokens.
+    /// @param addedValue The amount by which the allowance should be increased.
+    /// @return bool Whether the increase was successful.
     function increaseAllowance(
         address spender,
         uint256 addedValue
@@ -148,12 +192,10 @@ contract LosslessWrappedERC20 is ERC20Wrapper, LosslessUnwrapper, LosslessBase {
         return true;
     }
 
-    /// @notice This function corresponds to the regular decrease allowance
-    /// @dev This will call the lssDecreaseAllowance modifier which perofrms all the necessary checks
-    ///      with the Lossless controller
-    /// @param spender sender address
-    /// @param subtractedValue amount to decrease allowance
-    /// @return bool true if the allwance decrease was successful
+    /// @notice Decreases the caller's allowance to `spender` by `subtractedValue`.
+    /// @param spender The address of the contract that will no longer be able to transfer the tokens.
+    /// @param subtractedValue The amount by which the allowance should be decreased.
+    /// @return bool Whether the decrease was successful.
     function decreaseAllowance(
         address spender,
         uint256 subtractedValue
@@ -174,97 +216,48 @@ contract LosslessWrappedERC20 is ERC20Wrapper, LosslessUnwrapper, LosslessBase {
         return true;
     }
 
-    function setUnwrapingDelay(uint256 _newDelay) public onlyRecoveryAdmin {
-        unwrappingDelay = _newDelay;
+    // LOSSLESS UNWRAPPING
+
+    /// @notice This function places a withdraw request for an address
+    /// @param amount Amount of tokens to unwrap
+    function requestWithdraw(uint256 amount) public {
+        require(
+            amount <= balanceOf(_msgSender()),
+            "LSS: Request exceeds balance"
+        );
+
+        Unwrapping storage unwrapping = unwrappingRequests[_msgSender()];
+        unwrapping.unwrappingAmount = amount;
+        unwrapping.unwrappingTimestamp = block.timestamp + unwrappingDelay;
+
+        emit UnwrapRequested(_msgSender(), amount);
     }
 
+    /// @notice This function executes the unwrapping of tokens after a delay
+    /// @param to Address to send the unwrapped tokens
+    /// @param amount Amount of tokens to unwrap
     function withdrawTo(
-        address account,
+        address to,
         uint256 amount
     ) public override returns (bool) {
+        Unwrapping storage unwrapping = unwrappingRequests[_msgSender()];
+
+        require(
+            block.timestamp >= unwrapping.unwrappingTimestamp,
+            "LSS: Unwrapping not ready yet"
+        );
+
+        require(
+            amount <= unwrapping.unwrappingAmount,
+            "LSS: Amount exceeds requested amount"
+        );
+
+        unwrapping.unwrappingAmount -= amount;
         _burn(_msgSender(), amount);
-        if (_unwrap(account, amount)) {
-            return true;
-        }
+        SafeERC20.safeTransfer(underlying, to, amount);
 
-        return false;
-    }
+        emit UnwrapCompleted(_msgSender(), to, amount);
 
-    modifier onlyRecoveryAdmin() {
-        require(
-            _msgSender() == recoveryAdmin,
-            "LERC20: Must be recovery admin"
-        );
-        _;
-    }
-
-    /// @notice This function is for setting the admin that interacts with lossless protocol
-    /// @dev Only can be called by recovery admin
-    /// @param newAdmin new admin address
-    function setLosslessAdmin(address newAdmin) external onlyRecoveryAdmin {
-        require(newAdmin != admin, "LERC20: Cannot set same address");
-        emit NewAdmin(newAdmin);
-        admin = newAdmin;
-    }
-
-    /// @notice This function is for transfering the recovery admin role
-    /// @dev Only can be called by recovery admin
-    /// @param candidate New recovery admin address
-    /// @param keyHash Key hash to accept transfer
-    function transferRecoveryAdminOwnership(
-        address candidate,
-        bytes32 keyHash
-    ) external onlyRecoveryAdmin {
-        recoveryAdminCandidate = candidate;
-        recoveryAdminKeyHash = keyHash;
-        emit NewRecoveryAdminProposal(candidate);
-    }
-
-    /// @notice This function is for accepting the revoery admin ownership transfer
-    /// @dev Only can be called by recovery admin
-    /// @param key Key hash to accept transfer
-    function acceptRecoveryAdminOwnership(bytes memory key) external {
-        require(
-            _msgSender() == recoveryAdminCandidate,
-            "LERC20: Must be canditate"
-        );
-        require(keccak256(key) == recoveryAdminKeyHash, "LERC20: Invalid key");
-        emit NewRecoveryAdmin(recoveryAdminCandidate);
-        recoveryAdmin = recoveryAdminCandidate;
-        recoveryAdminCandidate = address(0);
-    }
-
-    /// @notice This function is for proposing turning off lossless
-    /// @dev Only can be called by recovery admin
-    function proposeLosslessTurnOff() external onlyRecoveryAdmin {
-        require(
-            losslessTurnOffTimestamp == 0,
-            "LERC20: TurnOff already proposed"
-        );
-        require(isLosslessOn, "LERC20: Lossless already off");
-        losslessTurnOffTimestamp = block.timestamp + timelockPeriod;
-        emit LosslessTurnOffProposal(losslessTurnOffTimestamp);
-    }
-
-    /// @notice This function is for executing the lossless turn off
-    /// @dev Only can be called by recovery admin and after the set period has passed
-    function executeLosslessTurnOff() external onlyRecoveryAdmin {
-        require(losslessTurnOffTimestamp != 0, "LERC20: TurnOff not proposed");
-        require(
-            losslessTurnOffTimestamp <= block.timestamp,
-            "LERC20: Time lock in progress"
-        );
-        isLosslessOn = false;
-        losslessTurnOffTimestamp = 0;
-        emit LosslessOff();
-    }
-
-    /// @notice This function is for turning on lossless
-    /// @dev Only can be called by recovery admin
-    function executeLosslessTurnOn() external onlyRecoveryAdmin {
-        require(!isLosslessOn, "LERC20: Lossless already on");
-        losslessTurnOffTimestamp = 0;
-        isLosslessOn = true;
-        emit LosslessOn();
+        return true;
     }
 }

@@ -14,7 +14,7 @@ import "lossless-v3/LosslessStaking.sol";
 import "../../src/Mocks/ERC20Mock.sol";
 import "../../src/Mocks/ERC20OwnableMock.sol";
 import "../../src/LosslessWrappedERC20.sol";
-import "../../src/LosslessWrappedERC20Adminless.sol";
+import "../../src/LosslessWrappedERC20Ownable.sol";
 
 import "forge-std/Test.sol";
 
@@ -41,8 +41,8 @@ contract LosslessTestEnvironment is Test {
     OwnableTestToken public testERC20;
     TestToken public adminlessTestERC20;
 
-    LosslessWrappedERC20 public wLERC20p;
-    LosslessWrappedERC20Adminless public wLERC20a;
+    LosslessWrappedERC20 public wLERC20a;
+    LosslessWrappedERC20Ownable public wLERC20p;
 
     uint256 unwrappingDelay = 3 hours;
 
@@ -122,7 +122,7 @@ contract LosslessTestEnvironment is Test {
 
     modifier withProtectedWrappedToken() {
         vm.startPrank(tokenOwner);
-        wLERC20p = new LosslessWrappedERC20(
+        wLERC20p = new LosslessWrappedERC20Ownable(
             testERC20,
             "Lossless Wrapped TEST",
             "wLTEST",
@@ -160,12 +160,13 @@ contract LosslessTestEnvironment is Test {
 
     modifier withAdminlessProtectedWrappedToken() {
         vm.startPrank(tokenOwner);
-        wLERC20a = new LosslessWrappedERC20Adminless(
+        wLERC20a = new LosslessWrappedERC20(
             adminlessTestERC20,
             "Adminless Lossless Wrapped TEST",
             "wLTEST",
             address(lssController),
-            unwrappingDelay
+            unwrappingDelay,
+            settlementTimelock
         );
 
         assertEq(wLERC20a.symbol(), "wLTEST");
