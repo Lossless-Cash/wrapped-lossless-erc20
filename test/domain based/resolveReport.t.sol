@@ -6,7 +6,6 @@ import "../utils/losslessEnv.t.sol";
 contract ResolveReport is LosslessTestEnvironment {
     function testResolveReportPositively()
         public
-        withExtensibleCoreProtected
         withProtectedWrappedToken
         withAdminlessProtectedWrappedToken
         withReportsGenerated
@@ -15,7 +14,6 @@ contract ResolveReport is LosslessTestEnvironment {
 
     function testResolveReportNegatively()
         public
-        withExtensibleCoreProtected
         withProtectedWrappedToken
         withAdminlessProtectedWrappedToken
         withReportsGenerated
@@ -24,7 +22,6 @@ contract ResolveReport is LosslessTestEnvironment {
 
     function testResolveReporTwice()
         public
-        withExtensibleCoreProtected
         withProtectedWrappedToken
         withAdminlessProtectedWrappedToken
         withReportsGenerated
@@ -34,7 +31,5 @@ contract ResolveReport is LosslessTestEnvironment {
         lssGovernance.resolveReport(1);
         vm.expectRevert("LSS: Report already solved");
         lssGovernance.resolveReport(2);
-        vm.expectRevert("LSS: Report already solved");
-        lssGovernance.resolveReport(3);
     }
 }
