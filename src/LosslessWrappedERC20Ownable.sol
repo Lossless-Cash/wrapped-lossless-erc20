@@ -11,6 +11,9 @@ contract LosslessWrappedERC20Ownable is LosslessWrappedERC20 {
     bytes32 private recoveryAdminKeyHash;
     address public admin;
 
+    uint256 public timelockPeriod;
+    uint256 public losslessTurnOffTimestamp;
+
     constructor(
         IERC20 _underlyingToken,
         string memory _name,
@@ -26,14 +29,15 @@ contract LosslessWrappedERC20Ownable is LosslessWrappedERC20 {
             _name,
             _symbol,
             lossless_,
-            _unwrappingDelay,
-            timelockPeriod_
+            _unwrappingDelay
         )
     {
         admin = admin_;
         recoveryAdmin = recoveryAdmin_;
         recoveryAdminCandidate = address(0);
         recoveryAdminKeyHash = "";
+        timelockPeriod = timelockPeriod_;
+        losslessTurnOffTimestamp = 0;
     }
 
     modifier onlyRecoveryAdmin() {

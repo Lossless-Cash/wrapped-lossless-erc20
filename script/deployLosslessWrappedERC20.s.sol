@@ -18,8 +18,7 @@ contract DeployAdminless is Script {
                 "Test Adminless",
                 "wLTSTe",
                 losslessController,
-                3 hours,
-                15 minutes
+                3 hours
             );
     }
 }

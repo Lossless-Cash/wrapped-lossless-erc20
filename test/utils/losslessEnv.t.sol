@@ -165,8 +165,7 @@ contract LosslessTestEnvironment is Test {
             "Adminless Lossless Wrapped TEST",
             "wLTEST",
             address(lssController),
-            unwrappingDelay,
-            settlementTimelock
+            unwrappingDelay
         );
 
         assertEq(wLERC20a.symbol(), "wLTEST");

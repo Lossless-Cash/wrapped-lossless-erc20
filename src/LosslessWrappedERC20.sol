@@ -11,8 +11,6 @@ import "./Interfaces/ILosslessEvents.sol";
 contract LosslessWrappedERC20 is ERC20Wrapper, ILosslessEvents {
     using SafeERC20 for IERC20;
 
-    uint256 public timelockPeriod; // I think this can be move to the other contract, not used here 
-    uint256 public losslessTurnOffTimestamp; // I think this can be move to the other contract, not used here 
     bool public isLosslessOn = true;
     ILssController public lossless;
 
@@ -30,11 +28,8 @@ contract LosslessWrappedERC20 is ERC20Wrapper, ILosslessEvents {
         string memory _name,
         string memory _symbol,
         address lossless_,
-        uint256 _unwrappingDelay,
-        uint256 timelockPeriod_
+        uint256 _unwrappingDelay
     ) ERC20(_name, _symbol) ERC20Wrapper(_underlyingToken) {
-        timelockPeriod = timelockPeriod_;
-        losslessTurnOffTimestamp = 0;
         lossless = ILssController(lossless_);
         unwrappingDelay = _unwrappingDelay;
     }
