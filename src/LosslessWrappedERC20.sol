@@ -41,7 +41,7 @@ contract LosslessWrappedERC20 is
 
     // --- LOSSLESS modifiers ---
 
-    modifier lssAprove(address spender, uint256 amount) {
+    modifier lssApprove(address spender, uint256 amount) {
         if (isLosslessOn) {
             lossless.beforeApprove(_msgSender(), spender, amount);
         }
@@ -137,7 +137,13 @@ contract LosslessWrappedERC20 is
     function approve(
         address spender,
         uint256 amount
-    ) public virtual override(ERC20) lssAprove(spender, amount) returns (bool) {
+    )
+        public
+        virtual
+        override(ERC20)
+        lssApprove(spender, amount)
+        returns (bool)
+    {
         _approve(_msgSender(), spender, amount);
         return true;
     }

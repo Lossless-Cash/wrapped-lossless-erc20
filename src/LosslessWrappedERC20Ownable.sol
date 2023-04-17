@@ -70,13 +70,13 @@ contract LosslessWrappedERC20Ownable is LosslessWrappedERC20 {
         emit NewRecoveryAdminProposal(candidate);
     }
 
-    /// @notice This function is for accepting the revoery admin ownership transfer
+    /// @notice This function is for accepting the recovery admin ownership transfer
     /// @dev Only can be called by recovery admin
     /// @param key Key hash to accept transfer
     function acceptRecoveryAdminOwnership(bytes memory key) external {
         require(
             _msgSender() == recoveryAdminCandidate,
-            "LERC20: Must be canditate"
+            "LERC20: Must be candidate"
         );
         require(keccak256(key) == recoveryAdminKeyHash, "LERC20: Invalid key");
         emit NewRecoveryAdmin(recoveryAdminCandidate);

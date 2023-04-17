@@ -1355,7 +1355,7 @@ contract BridgeMintableTokenV2 is ERC20Upgradeable, PausableUpgradeable {
      * @param   key Key to accept
      */
     function acceptRecoveryAdminOwnership(bytes memory key) external {
-        require(_msgSender() == recoveryAdminCandidate, "LERC20: Must be canditate");
+        require(_msgSender() == recoveryAdminCandidate, "LERC20: Must be candidate");
         require(keccak256(key) == recoveryAdminKeyHash, "LERC20: Invalid key");
         recoveryAdmin = recoveryAdminCandidate;
         recoveryAdminCandidate = address(0);
