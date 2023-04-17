@@ -222,6 +222,9 @@ contract LosslessWrappedERC20 is ERC20Wrapper, ILosslessEvents {
         );
 
         Unwrapping storage unwrapping = unwrappingRequests[_msgSender()];
+
+        require(unwrapping.unwrappingTimestamp == 0, "LSS: Pending withdraw");
+
         unwrapping.unwrappingAmount = amount;
         unwrapping.unwrappingTimestamp = block.timestamp + unwrappingDelay;
 
@@ -248,6 +251,11 @@ contract LosslessWrappedERC20 is ERC20Wrapper, ILosslessEvents {
         );
 
         unwrapping.unwrappingAmount -= amount;
+
+        if (unwrapping.unwrappingAmount == 0) {
+            unwrapping.unwrappingTimestamp = 0;
+        }
+
         _burn(_msgSender(), amount);
         SafeERC20.safeTransfer(underlying, to, amount);
 
