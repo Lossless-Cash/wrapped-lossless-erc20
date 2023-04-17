@@ -2,13 +2,18 @@
 pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Wrapper.sol";
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 import "lossless-v3/Interfaces/ILosslessController.sol";
 
 import "./Interfaces/ILosslessEvents.sol";
 
-contract LosslessWrappedERC20 is ERC20Wrapper, ILosslessEvents {
+contract LosslessWrappedERC20 is
+    ERC20Wrapper,
+    ILosslessEvents,
+    ReentrancyGuard
+{
     using SafeERC20 for IERC20;
 
     bool public isLosslessOn = true;
@@ -237,7 +242,7 @@ contract LosslessWrappedERC20 is ERC20Wrapper, ILosslessEvents {
     function withdrawTo(
         address to,
         uint256 amount
-    ) public override returns (bool) {
+    ) public override nonReentrant returns (bool) {
         Unwrapping storage unwrapping = unwrappingRequests[_msgSender()];
 
         require(
