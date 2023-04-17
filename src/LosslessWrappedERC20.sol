@@ -268,4 +268,24 @@ contract LosslessWrappedERC20 is
 
         return true;
     }
+
+    /// @notice This function cancels pending withdrawal request
+    function cancelWithdrawRequest() public {
+        Unwrapping storage unwrapping = unwrappingRequests[_msgSender()];
+
+        require(
+            unwrapping.unwrappingAmount > 0,
+            "LSS: No active withdrawal request"
+        );
+
+        require(
+            unwrapping.unwrappingTimestamp > block.timestamp,
+            "LSS: Withdrawal request already executable"
+        );
+
+        unwrapping.unwrappingAmount = 0;
+        unwrapping.unwrappingTimestamp = 0;
+
+        emit WithdrawRequestCanceled(_msgSender());
+    }
 }

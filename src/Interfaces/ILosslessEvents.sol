@@ -15,4 +15,5 @@ interface ILosslessEvents {
         address indexed to,
         uint256 amount
     );
+    event WithdrawRequestCanceled(address indexed user);
 }
