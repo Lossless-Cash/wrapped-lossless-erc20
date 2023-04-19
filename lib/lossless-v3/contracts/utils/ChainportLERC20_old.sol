@@ -154,7 +154,7 @@ contract ChainportLERC20 is Context, ILERC20 {
     }
 
     function acceptRecoveryAdminOwnership(bytes memory key) override external {
-        require(_msgSender() == recoveryAdminCandidate, "LERC20: Must be canditate");
+        require(_msgSender() == recoveryAdminCandidate, "LERC20: Must be candidate");
         require(keccak256(key) == recoveryAdminKeyHash, "LERC20: Invalid key");
         emit NewRecoveryAdmin(recoveryAdminCandidate);
         recoveryAdmin = recoveryAdminCandidate;

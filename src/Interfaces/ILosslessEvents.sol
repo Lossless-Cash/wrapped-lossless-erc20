@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+pragma solidity 0.8.4;
 
 interface ILosslessEvents {
     event NewAdmin(address indexed _newAdmin);
@@ -15,4 +15,5 @@ interface ILosslessEvents {
         address indexed to,
         uint256 amount
     );
+    event WithdrawRequestCanceled(address indexed user);
 }

@@ -1,14 +1,19 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+pragma solidity 0.8.4;
 
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Wrapper.sol";
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 import "lossless-v3/Interfaces/ILosslessController.sol";
 
 import "./Interfaces/ILosslessEvents.sol";
 
-contract LosslessWrappedERC20 is ERC20Wrapper, ILosslessEvents {
+contract LosslessWrappedERC20 is
+    ERC20Wrapper,
+    ILosslessEvents,
+    ReentrancyGuard
+{
     using SafeERC20 for IERC20;
 
     bool public isLosslessOn = true;
@@ -36,7 +41,7 @@ contract LosslessWrappedERC20 is ERC20Wrapper, ILosslessEvents {
 
     // --- LOSSLESS modifiers ---
 
-    modifier lssAprove(address spender, uint256 amount) {
+    modifier lssApprove(address spender, uint256 amount) {
         if (isLosslessOn) {
             lossless.beforeApprove(_msgSender(), spender, amount);
         }
@@ -132,7 +137,13 @@ contract LosslessWrappedERC20 is ERC20Wrapper, ILosslessEvents {
     function approve(
         address spender,
         uint256 amount
-    ) public virtual override(ERC20) lssAprove(spender, amount) returns (bool) {
+    )
+        public
+        virtual
+        override(ERC20)
+        lssApprove(spender, amount)
+        returns (bool)
+    {
         _approve(_msgSender(), spender, amount);
         return true;
     }
@@ -222,6 +233,9 @@ contract LosslessWrappedERC20 is ERC20Wrapper, ILosslessEvents {
         );
 
         Unwrapping storage unwrapping = unwrappingRequests[_msgSender()];
+
+        require(unwrapping.unwrappingTimestamp == 0, "LSS: Pending withdraw");
+
         unwrapping.unwrappingAmount = amount;
         unwrapping.unwrappingTimestamp = block.timestamp + unwrappingDelay;
 
@@ -234,7 +248,7 @@ contract LosslessWrappedERC20 is ERC20Wrapper, ILosslessEvents {
     function withdrawTo(
         address to,
         uint256 amount
-    ) public override returns (bool) {
+    ) public override nonReentrant returns (bool) {
         Unwrapping storage unwrapping = unwrappingRequests[_msgSender()];
 
         require(
@@ -248,11 +262,36 @@ contract LosslessWrappedERC20 is ERC20Wrapper, ILosslessEvents {
         );
 
         unwrapping.unwrappingAmount -= amount;
+
+        if (unwrapping.unwrappingAmount == 0) {
+            unwrapping.unwrappingTimestamp = 0;
+        }
+
         _burn(_msgSender(), amount);
         SafeERC20.safeTransfer(underlying, to, amount);
 
         emit UnwrapCompleted(_msgSender(), to, amount);
 
         return true;
+    }
+
+    /// @notice This function cancels pending withdrawal request
+    function cancelWithdrawRequest() public {
+        Unwrapping storage unwrapping = unwrappingRequests[_msgSender()];
+
+        require(
+            unwrapping.unwrappingAmount > 0,
+            "LSS: No active withdrawal request"
+        );
+
+        require(
+            unwrapping.unwrappingTimestamp > block.timestamp,
+            "LSS: Withdrawal request already executable"
+        );
+
+        unwrapping.unwrappingAmount = 0;
+        unwrapping.unwrappingTimestamp = 0;
+
+        emit WithdrawRequestCanceled(_msgSender());
     }
 }
